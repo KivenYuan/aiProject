@@ -22,7 +22,11 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    
+    /* ES Module Interop */
+    "esModuleInterop": true,
+    "isolatedModules": true
   },
   "include": ["src"]
 }

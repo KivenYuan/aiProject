@@ -9,8 +9,8 @@
 import type { LoginRequest, RegisterRequest, AuthResponse, User } from '../types/auth.types';
 import { generateMockUser } from '../utils/auth.utils';
 
-// API基础URL（从环境变量获取）
-const API_BASE = import.meta.env.VITE_AUTH_API_BASE || 'http://localhost:3000/api/auth';
+// API基础URL（从环境变量获取）- 当前为模拟数据，实际使用时需要替换为真实API地址
+// const API_BASE = import.meta.env.VITE_AUTH_API_BASE || 'http://localhost:3000/api/auth';
 
 // 模拟延迟函数
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -177,7 +177,8 @@ export const verifyToken = async (token: string): Promise<AuthResponse> => {
 };
 
 // 忘记密码服务（预留）
-export const forgotPassword = async (email: string): Promise<{ success: boolean; message: string }> => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const forgotPassword = async (_email: string): Promise<{ success: boolean; message: string }> => {
   await delay(800);
   return {
     success: true,
@@ -186,7 +187,8 @@ export const forgotPassword = async (email: string): Promise<{ success: boolean;
 };
 
 // 重置密码服务（预留）
-export const resetPassword = async (token: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const resetPassword = async (_token: string, _newPassword: string): Promise<{ success: boolean; message: string }> => {
   await delay(800);
   return {
     success: true,
