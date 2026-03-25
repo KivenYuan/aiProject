@@ -1,5 +1,5 @@
 {
-  "name": "ai-backend",
+  "name": "backend",
   "version": "0.1.0",
   "description": "AI项目后端API服务 - 处理用户认证和GitHub OAuth代理",
   "main": "src/index.js",

@@ -12,7 +12,7 @@
 ### 安装依赖
 
 ```bash
-cd ai-backend
+cd backend
 npm install
 ```
 
@@ -173,7 +173,7 @@ GET /api/users
 ## 🗂️ 项目结构
 
 ```
-ai-backend/
+backend/
 ├── src/
 │   ├── index.js              # 应用入口
 │   ├── routes/               # API路由

@@ -2,7 +2,7 @@
 
 ## 项目信息
 
-**项目名称**：`ai-frontend`
+**项目名称**：`ai-project`（前端目录 `frontend/`）
 **项目描述**：AI项目的前端界面，基于React + Vite + TypeScript + Tailwind CSS技术栈
 **架构版本**：`2.0.0` (模块化架构)
 **最后更新**：`2026-03-20`

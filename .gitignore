@@ -41,3 +41,6 @@ jest-coverage/
 
 # Local backup copies
 *.backup.ts
+
+# Legacy folder name (safe to delete locally after copying .env to backend/)
+/ai-backend/

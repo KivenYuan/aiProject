@@ -127,7 +127,7 @@ graph TD
 **实现方案**：
 ```bash
 # 项目初始化命令
-npm create vite@latest ai-frontend -- --template react-ts
+npm create vite@latest frontend -- --template react-ts
 npm install -D tailwindcss@^3.4.0 postcss autoprefixer
 npx tailwindcss init -p
 ```
