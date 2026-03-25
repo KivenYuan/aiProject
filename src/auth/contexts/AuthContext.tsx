@@ -97,6 +97,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initAuth();
+    
+    // 监听storage事件，当认证信息变化时重新检查
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'auth_token' || event.key === 'auth_user') {
+        console.log('检测到认证信息变化，重新检查认证状态');
+        initAuth();
+      }
+    };
+    
+    // 监听自定义的storage事件（由GitHubContext触发）
+    const handleCustomStorageEvent = () => {
+      console.log('收到storage事件，重新检查认证状态');
+      initAuth();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('storage', handleCustomStorageEvent);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storage', handleCustomStorageEvent);
+    };
   }, []);
 
   // 登录函数

@@ -84,16 +84,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
-      {/* 表单头部 */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-md mb-4">
-          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-          </svg>
-        </div>
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">登录</h2>
-        <p className="text-gray-600 mt-2">请输入您的账户信息以继续</p>
+    <div className="w-full">
+      <div className="mb-6 text-center">
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900">登录</h2>
+        <p className="mt-1 text-sm text-slate-600">请使用邮箱与密码登录</p>
       </div>
       
       {error && (

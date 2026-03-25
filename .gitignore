@@ -29,3 +29,6 @@ coverage/
 
 # Jest
 jest-coverage/
+
+# Local backup copies
+*.backup.ts

@@ -128,16 +128,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8">
-      {/* 表单头部 */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl shadow-md mb-4">
-          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-          </svg>
-        </div>
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">注册新账户</h2>
-        <p className="text-gray-600 mt-2">创建您的账户以开始使用AI功能</p>
+    <div className="w-full">
+      <div className="mb-6 text-center">
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900">注册新账户</h2>
+        <p className="mt-1 text-sm text-slate-600">创建账户以演示注册与鉴权流程</p>
       </div>
       
       {error && (

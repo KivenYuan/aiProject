@@ -10,6 +10,10 @@
 - 🎨 **Tailwind CSS** - 实用优先的 CSS 框架
 - 🧹 **ESLint** - 代码质量检查
 - 📝 **文档驱动开发** - 功能思维导图工作流
+- 🔐 **用户认证系统** - 完整的登录/注册/会话管理 (F-002)
+- 📊 **开发者仪表盘** - GitHub数据可视化，提交记录统计 (F-003)
+- 🔄 **GitHub集成** - OAuth认证，实时数据同步
+- 📱 **响应式设计** - 移动端和桌面端适配
 
 ## 🚀 快速开始
 
@@ -21,6 +25,26 @@
 ```bash
 cd ai-frontend
 npm install
+```
+
+### GitHub OAuth 配置（开发者仪表盘必需）
+1. 访问 [GitHub Developer Settings](https://github.com/settings/developers)
+2. 点击 "New OAuth App"
+3. 填写以下信息：
+   - **Application name**: AI Frontend Dashboard
+   - **Homepage URL**: http://localhost:5173
+   - **Authorization callback URL**: http://localhost:5173/auth/github/callback
+4. 点击 "Register application"
+5. 复制生成的 **Client ID**（`Client Secret` 只配置在后端）
+6. 在项目根目录创建 `.env.local` 文件：
+```bash
+# 复制 .env.example 到 .env.local
+cp .env.example .env.local
+```
+7. 编辑 `.env.local`，填入你的 GitHub OAuth 凭据：
+```env
+VITE_GITHUB_CLIENT_ID=your_client_id_here
+VITE_GITHUB_REDIRECT_URI=http://localhost:5173/auth/github/callback
 ```
 
 ### 开发模式
@@ -44,6 +68,18 @@ npm run preview
 ```
 ai-frontend/
 ├── src/                    # 源代码
+│   ├── auth/              # 用户认证模块 (F-002)
+│   │   ├── components/    # 认证组件
+│   │   ├── contexts/      # 认证上下文
+│   │   ├── services/      # 认证服务
+│   │   ├── types/         # 认证类型
+│   │   └── utils/         # 认证工具
+│   ├── dashboard/         # 开发者仪表盘模块 (F-003)
+│   │   ├── components/    # 仪表盘组件
+│   │   ├── contexts/      # GitHub上下文
+│   │   ├── services/      # GitHub API服务
+│   │   ├── types/         # GitHub类型
+│   │   └── utils/         # GitHub工具
 │   ├── assets/            # 静态资源
 │   ├── App.tsx           # 主应用组件
 │   ├── App.css           # 应用样式
@@ -52,6 +88,7 @@ ai-frontend/
 ├── scripts/              # 工具脚本
 │   └── feature-map-manager.py  # 功能文档管理工具
 ├── public/               # 公共资源
+├── docs/                # 模块化文档
 ├── FEATURE-MAP.md        # 功能思维导图（核心文档）
 ├── tailwind.config.js    # Tailwind CSS 配置
 ├── postcss.config.js     # PostCSS 配置
@@ -59,6 +96,31 @@ ai-frontend/
 ├── tsconfig.json        # TypeScript 配置
 └── package.json         # 项目依赖
 ```
+
+## 🎯 功能模块
+
+### F-002: 用户认证系统
+- ✅ 用户登录/注册界面
+- ✅ 表单验证和错误处理
+- ✅ React Context状态管理
+- ✅ 会话持久化
+- 📋 忘记密码功能（预留）
+- 📋 第三方登录集成
+
+### F-003: 开发者仪表盘
+- ✅ GitHub OAuth认证集成
+- ✅ 用户信息显示
+- ✅ 仓库列表和统计
+- ✅ 提交时间线
+- ✅ 活动动态展示
+- ✅ 数据可视化图表
+- ✅ 响应式设计
+- 📋 贡献图展示（待完善）
+- 📋 数据分析报告（待完善）
+
+### 即将开发
+- F-004: 文件管理模块
+- F-005: 响应式布局优化
 
 ## 📋 文档驱动开发工作流
 

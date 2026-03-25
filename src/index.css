@@ -58,12 +58,21 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  text-align: center;
+  text-align: left;
   border-inline: none;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
+
+/* 避免全局 h1/h2 尺寸覆盖 Tailwind 组件标题 */
+#root h1,
+#root h2 {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  margin: 0;
 }
 
 html, body {
