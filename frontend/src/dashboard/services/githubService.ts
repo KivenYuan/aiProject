@@ -138,7 +138,7 @@ export class GitHubService {
       return {
         user: dashboardData.user,
         repos: dashboardData.repos,
-        totalCommits: 0, // 后端可能没有提供这个字段
+        totalCommits: dashboardData.recentCommits.length,
         recentCommits: dashboardData.recentCommits,
         recentActivity: dashboardData.recentActivity,
         languages: dashboardData.languages.reduce((acc, lang) => {
@@ -205,10 +205,10 @@ export class GitHubService {
       return {
         user,
         repos,
-        totalCommits: 0, // 需要后端提供准确数据
         recentCommits: recentCommits.sort((a, b) => 
           new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime()
         ).slice(0, 20),
+        totalCommits: recentCommits.length,
         recentActivity: recentActivity.slice(0, 20),
         languages,
         repoCount: repos.length,
