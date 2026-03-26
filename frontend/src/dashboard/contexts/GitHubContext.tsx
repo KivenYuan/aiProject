@@ -16,6 +16,7 @@ import {
   clearTokenFromStorage,
   saveGitHubAccessToken,
   generateOAuthUrl,
+  isGitHubOAuthConfigured,
   handleGitHubError,
   isTokenValid
 } from '../utils/github.utils';
@@ -200,6 +201,12 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
 
   // 开始GitHub OAuth流程（重定向到GitHub）
   const startOAuth = () => {
+    if (!isGitHubOAuthConfigured()) {
+      setError(
+        '未配置 GitHub OAuth：请在 frontend/.env.local 中设置 VITE_GITHUB_CLIENT_ID（见 .env.example），保存后重启前端 dev。'
+      );
+      return;
+    }
     window.location.href = generateOAuthUrl();
   };
 

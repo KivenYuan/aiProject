@@ -299,22 +299,40 @@ export function getGitHubAccessToken(): string | null {
   }
 }
 
+/** 与 frontend/.env.example 中占位符一致，避免误用示例值跳转 GitHub */
+const GITHUB_CLIENT_ID_PLACEHOLDER = 'your_github_client_id_here';
+
 /**
- * 生成GitHub OAuth授权URL
+ * 是否已配置有效的 GitHub OAuth Client ID（Vite 仅在启动时注入 `VITE_*`）
+ */
+export function isGitHubOAuthConfigured(): boolean {
+  const raw = import.meta.env.VITE_GITHUB_CLIENT_ID;
+  if (raw === undefined || raw === null) return false;
+  const id = String(raw).trim();
+  return Boolean(id && id !== GITHUB_CLIENT_ID_PLACEHOLDER);
+}
+
+/**
+ * 生成GitHub OAuth授权URL（须先 {@link isGitHubOAuthConfigured} 为 true，否则抛错）
  */
 export function generateOAuthUrl(): string {
-  const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+  if (!isGitHubOAuthConfigured()) {
+    throw new Error(
+      '未配置 VITE_GITHUB_CLIENT_ID：请复制 frontend/.env.example 为 frontend/.env.local，填写 GitHub OAuth App 的 Client ID 后重启 npm run dev。'
+    );
+  }
+
+  const clientId = String(import.meta.env.VITE_GITHUB_CLIENT_ID).trim();
   const redirectUri = import.meta.env.VITE_GITHUB_REDIRECT_URI || `${window.location.origin}/auth/github/callback`;
   const scope = 'user,repo,read:org';
-  
-  // 调试日志
+
   console.log('🔍 GitHub OAuth配置检查:');
-  console.log('   - VITE_GITHUB_CLIENT_ID:', clientId ? '已设置' : '未设置');
+  console.log('   - VITE_GITHUB_CLIENT_ID:', '已设置');
   console.log('   - VITE_GITHUB_REDIRECT_URI:', redirectUri);
   console.log('   - 当前origin:', window.location.origin);
-  
+
   const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
   console.log('🔗 生成的GitHub OAuth URL:', url.substring(0, 100) + '...');
-  
+
   return url;
 }

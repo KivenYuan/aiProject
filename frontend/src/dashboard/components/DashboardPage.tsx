@@ -8,13 +8,17 @@ import GitHubStatsCard from './GitHubStatsCard';
 import RepoList from './RepoList';
 import CommitTimeline from './CommitTimeline';
 import ActivityFeed from './ActivityFeed';
-import { generateOAuthUrl } from '../utils/github.utils';
+import { generateOAuthUrl, isGitHubOAuthConfigured } from '../utils/github.utils';
 
 const shell = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
 const card = 'rounded-2xl border border-slate-200/80 bg-white/90 shadow-card backdrop-blur-sm';
 
+const OAUTH_SETUP_HINT =
+  '请复制 frontend/.env.example 为 frontend/.env.local，将 VITE_GITHUB_CLIENT_ID 设为你在 GitHub → Settings → Developer settings → OAuth Apps 中创建的 Client ID，保存后重启 npm run dev。';
+
 const DashboardPage: React.FC = () => {
   const { token, user, stats, isLoading, error, logout, loginDev } = useGitHub();
+  const oauthReady = isGitHubOAuthConfigured();
 
   if (!token) {
     return (
@@ -41,7 +45,13 @@ const DashboardPage: React.FC = () => {
           </p>
 
           <a
-            href={generateOAuthUrl()}
+            href={oauthReady ? generateOAuthUrl() : '#'}
+            onClick={(e) => {
+              if (!oauthReady) {
+                e.preventDefault();
+                window.alert(OAUTH_SETUP_HINT);
+              }
+            }}
             className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800"
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
