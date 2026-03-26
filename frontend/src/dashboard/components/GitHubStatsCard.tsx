@@ -19,7 +19,7 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
     .slice(0, 5);
 
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm md:p-8">
+    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm md:p-8 dark:border-slate-700 dark:bg-slate-900/85">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {/* 仓库数量 */}
         <div className="rounded-xl border border-blue-100/80 bg-gradient-to-br from-blue-50 to-indigo-50/80 p-4">
@@ -176,13 +176,13 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
       </div>
 
       {/* 用户信息 */}
-      <div className="mt-8 border-t border-slate-200 pt-8">
-        <div className="flex items-center justify-between">
+      <div className="mt-8 border-t border-slate-200 pt-8 dark:border-slate-700">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <img
               src={user.avatar_url}
               alt={user.login}
-              className="w-12 h-12 rounded-full border-2 border-white shadow-md"
+              className="h-12 w-12 shrink-0 rounded-full border-2 border-white shadow-md dark:border-slate-700"
             />
             <div>
               <h4 className="font-bold text-gray-900">{user.name || user.login}</h4>

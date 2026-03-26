@@ -9,6 +9,9 @@ const router = express.Router();
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const { getAxiosProxyConfig } = require('../utils/proxy-agent');
+const GITHUB_TIMEOUT_MS = Number(process.env.GITHUB_API_TIMEOUT_MS || 8000);
+const DASHBOARD_CACHE_TTL_MS = Number(process.env.GITHUB_DASHBOARD_CACHE_TTL_MS || 60000);
+const dashboardCache = new Map();
 
 // 中间件：验证JWT并提取用户信息
 const authenticate = (req, res, next) => {
@@ -264,87 +267,60 @@ router.get('/dashboard', authenticate, async (req, res) => {
     }
 
     console.log('获取GitHub仪表盘数据');
+    const cacheKey = req.user?.githubId || req.user?.id || 'anonymous';
+    const now = Date.now();
+    const cached = dashboardCache.get(cacheKey);
+    if (cached && now - cached.ts < DASHBOARD_CACHE_TTL_MS) {
+      return res.json(cached.payload);
+    }
 
-    // 并行获取多个数据源
+    const baseHeaders = {
+      'Authorization': `Bearer ${githubToken}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'AI-Frontend-Backend'
+    };
+    const githubGet = (url, params = {}) => axios.get(url, {
+      headers: baseHeaders,
+      params,
+      timeout: GITHUB_TIMEOUT_MS,
+      ...getAxiosProxyConfig()
+    });
+
+    // 并行获取核心数据
     const [userResponse, reposResponse] = await Promise.all([
-      axios.get(`${GITHUB_API_BASE}/user`, {
-        headers: {
-          'Authorization': `Bearer ${githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'AI-Frontend-Backend'
-        },
-        ...getAxiosProxyConfig()
-      }),
-      axios.get(`${GITHUB_API_BASE}/user/repos`, {
-        headers: {
-          'Authorization': `Bearer ${githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'AI-Frontend-Backend'
-        },
-        params: {
-          type: 'owner',
-          sort: 'updated',
-          direction: 'desc',
-          per_page: 50
-        },
-        ...getAxiosProxyConfig()
+      githubGet(`${GITHUB_API_BASE}/user`),
+      githubGet(`${GITHUB_API_BASE}/user/repos`, {
+        type: 'owner',
+        sort: 'updated',
+        direction: 'desc',
+        per_page: 20
       })
     ]);
 
     const user = userResponse.data;
     const repos = reposResponse.data;
 
-    // 获取最近提交（从前3个仓库）
-    const recentCommits = [];
+    // 获取最近提交（从前3个仓库，并行）
     const reposToCheck = repos.slice(0, 3);
-    
-    for (const repo of reposToCheck) {
-      try {
-        const commitsResponse = await axios.get(
-          `${GITHUB_API_BASE}/repos/${repo.owner.login}/${repo.name}/commits`,
-          {
-            headers: {
-              'Authorization': `Bearer ${githubToken}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'User-Agent': 'AI-Frontend-Backend'
-            },
-            params: {
-              author: user.login,
-              per_page: 5
-            },
-            ...getAxiosProxyConfig()
-          }
-        );
-        
-        recentCommits.push(...commitsResponse.data.map(commit => ({
-          ...commit,
-          repo: repo.name,
-          repoOwner: repo.owner.login
-        })));
-      } catch (error) {
-        console.warn(`获取仓库 ${repo.full_name} 提交失败:`, error.message);
-      }
-    }
-
-    // 获取用户最近活动
-    let recentActivity = [];
-    try {
-      const activityResponse = await axios.get(
-        `${GITHUB_API_BASE}/users/${user.login}/events`,
-        {
-          headers: {
-            'Authorization': `Bearer ${githubToken}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'AI-Frontend-Backend'
-          },
-          params: { per_page: 20 },
-          ...getAxiosProxyConfig()
+    const commitResults = await Promise.all(
+      reposToCheck.map(async (repo) => {
+        try {
+          const commitsResponse = await githubGet(
+            `${GITHUB_API_BASE}/repos/${repo.owner.login}/${repo.name}/commits`,
+            { author: user.login, per_page: 5 }
+          );
+          return commitsResponse.data.map(commit => ({
+            ...commit,
+            repo: repo.name,
+            repoOwner: repo.owner.login
+          }));
+        } catch (error) {
+          console.warn(`获取仓库 ${repo.full_name} 提交失败:`, error.message);
+          return [];
         }
-      );
-      recentActivity = activityResponse.data;
-    } catch (error) {
-      console.warn('获取用户活动失败:', error.message);
-    }
+      })
+    );
+    const recentCommits = commitResults.flat();
 
     // 计算统计信息
     const starCount = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
@@ -358,36 +334,35 @@ router.get('/dashboard', authenticate, async (req, res) => {
       }
     }
 
-    // 获取Issue/PR统计
+    // 并行获取用户活动与 Issue/PR 统计
+    const [activityResult, issuesResult] = await Promise.allSettled([
+      githubGet(`${GITHUB_API_BASE}/users/${user.login}/events`, { per_page: 15 }),
+      githubGet(`${GITHUB_API_BASE}/issues`, {
+        filter: 'created',
+        state: 'all',
+        per_page: 20
+      })
+    ]);
+
+    let recentActivity = [];
+    if (activityResult.status === 'fulfilled') {
+      recentActivity = activityResult.value.data;
+    } else {
+      console.warn('获取用户活动失败:', activityResult.reason?.message);
+    }
+
     let issueCount = 0;
     let prCount = 0;
-    try {
-      const issuesResponse = await axios.get(
-        `${GITHUB_API_BASE}/issues`,
-        {
-          headers: {
-            'Authorization': `Bearer ${githubToken}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'AI-Frontend-Backend'
-          },
-          params: {
-            filter: 'created',
-            state: 'all',
-            per_page: 50
-          },
-          ...getAxiosProxyConfig()
-        }
-      );
-      
-      const issues = issuesResponse.data;
+    if (issuesResult.status === 'fulfilled') {
+      const issues = issuesResult.value.data;
       issueCount = issues.filter(issue => !issue.pull_request).length;
       prCount = issues.filter(issue => issue.pull_request).length;
-    } catch (error) {
-      console.warn('获取Issue/PR统计失败:', error.message);
+    } else {
+      console.warn('获取Issue/PR统计失败:', issuesResult.reason?.message);
     }
 
     // 返回聚合数据
-    res.json({
+    const payload = {
       success: true,
       data: {
         user,
@@ -409,7 +384,9 @@ router.get('/dashboard', authenticate, async (req, res) => {
           following: user.following
         }
       }
-    });
+    };
+    dashboardCache.set(cacheKey, { ts: now, payload });
+    res.json(payload);
 
   } catch (error) {
     console.error('获取GitHub仪表盘数据错误:', error.message);

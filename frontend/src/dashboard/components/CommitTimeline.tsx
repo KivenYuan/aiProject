@@ -57,7 +57,7 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm">
+    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/85">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-xl font-bold text-gray-900">提交时间线</h3>

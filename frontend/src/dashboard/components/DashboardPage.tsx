@@ -11,7 +11,8 @@ import ActivityFeed from './ActivityFeed';
 import { generateOAuthUrl, isGitHubOAuthConfigured } from '../utils/github.utils';
 
 const shell = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
-const card = 'rounded-2xl border border-slate-200/80 bg-white/90 shadow-card backdrop-blur-sm';
+const card =
+  'dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 shadow-card backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/85';
 
 const OAUTH_SETUP_HINT =
   '请复制 frontend/.env.example 为 frontend/.env.local，将 VITE_GITHUB_CLIENT_ID 设为你在 GitHub → Settings → Developer settings → OAuth Apps 中创建的 Client ID，保存后重启 npm run dev。';
@@ -135,20 +136,20 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className={shell}>
-      <section className="border-b border-slate-200/80 bg-gradient-to-r from-white/80 to-brand-50/40 py-10 backdrop-blur-sm lg:py-12">
+      <section className={`${card} px-4 py-8 sm:px-6 lg:px-8 lg:py-10`}>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
             <img
               src={user.avatar_url}
               alt=""
-              className="h-14 w-14 rounded-2xl border border-white shadow-soft ring-2 ring-slate-100"
+              className="h-14 w-14 shrink-0 rounded-2xl border border-white shadow-soft ring-2 ring-slate-100 dark:border-slate-700 dark:ring-slate-700/60"
             />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">GitHub Profile</p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-300">GitHub Profile</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
                 {user.name || user.login}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
                 @{user.login}
                 {user.bio ? ` · ${user.bio}` : ''}
               </p>
@@ -159,20 +160,20 @@ const DashboardPage: React.FC = () => {
               href={user.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             >
               在 GitHub 上查看
             </a>
             <button
               type="button"
               onClick={logout}
-              className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               退出连接
             </button>
           </div>
         </div>
-        <p className="mt-6 text-sm text-slate-500">
+        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
           数据概览 · 最近更新 {stats ? new Date().toLocaleDateString('zh-CN') : '—'}
         </p>
       </section>
