@@ -10,9 +10,7 @@ import type {
   GitHubEvent,
   GitHubIssue,
   GitHubStats,
-  GitHubApiResponse,
   GitHubError,
-  GitHubToken
 } from '../types/github.types';
 import { getGitHubAccessToken } from '../utils/github.utils';
 
@@ -238,7 +236,7 @@ export class GitHubService {
   /**
    * 获取用户提交统计
    */
-  async getUserCommitStats(username: string): Promise<{ total: number }> {
+  async getUserCommitStats(_username: string): Promise<{ total: number }> {
     // 这个API可能需要后端特定实现
     // 暂时返回估算值
     try {
@@ -267,7 +265,7 @@ export class GitHubService {
  * GitHub OAuth token交换
  * ⚠️ 注意：现在由后端处理GitHub OAuth，前端不再直接调用GitHub API
  */
-export async function exchangeCodeForToken(code: string): Promise<string> {
+export async function exchangeCodeForToken(_code: string): Promise<string> {
   console.warn('⚠️ 前端不再直接处理GitHub OAuth token交换');
   console.warn('💡 应该调用 authService.exchangeGitHubCode(code)');
   console.warn('📝 流程：前端将code发送到后端，后端返回JWT token');
@@ -320,7 +318,7 @@ export class MockGitHubService {
     };
   }
   
-  async getRepos(sort: 'created' | 'updated' | 'pushed' | 'full_name' = 'updated', direction: 'asc' | 'desc' = 'desc'): Promise<GitHubRepo[]> {
+  async getRepos(_sort: 'created' | 'updated' | 'pushed' | 'full_name' = 'updated', _direction: 'asc' | 'desc' = 'desc'): Promise<GitHubRepo[]> {
     if (!this.isMockMode) {
       throw new Error('Mock service requires mock token');
     }
@@ -332,6 +330,7 @@ export class MockGitHubService {
       id: 1000000 + i,
       name: `demo-repo-${i + 1}`,
       full_name: `demo-user/demo-repo-${i + 1}`,
+      private: false,
       html_url: `https://github.com/demo-user/demo-repo-${i + 1}`,
       description: `A sample repository for demonstration purposes #${i + 1}`,
       fork: i % 4 === 0,
@@ -459,6 +458,8 @@ export class MockGitHubService {
         id: 12345678,
         login: 'demo-user',
         display_login: 'demo-user',
+        gravatar_id: '',
+        url: 'https://api.github.com/users/demo-user',
         avatar_url: 'https://avatars.githubusercontent.com/u/12345678?v=4'
       },
       repo: {

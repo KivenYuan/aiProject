@@ -5,7 +5,7 @@
 /**
  * GitHub 工具函数
  */
-import type { GitHubRepo, GitHubCommit, GitHubEvent, GitHubStats } from '../types/github.types';
+import type { GitHubRepo } from '../types/github.types';
 
 /**
  * 格式化日期

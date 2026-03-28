@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, useLocation } from 'react-router-dom';
 
@@ -22,7 +22,7 @@ interface AuthGuardProps {
  *      <LoginPage />
  *    </AuthGuard>
  */
-const AuthGuard: React.FC<AuthGuardProps> = ({
+const AuthGuard: FC<AuthGuardProps> = ({
   children,
   requireAuth = true,
   redirectTo,

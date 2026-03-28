@@ -28,6 +28,15 @@ export interface GitHubRepo {
   id: number;
   name: string;
   full_name: string;
+  /** GitHub API 字段名 */
+  private: boolean;
+  owner: {
+    login: string;
+    id: number;
+    avatar_url: string;
+    html_url: string;
+    type?: string;
+  };
   html_url: string;
   description: string | null;
   fork: boolean;
@@ -65,6 +74,10 @@ export interface GitHubRepo {
   default_branch: string;
 }
 
+/** 提交记录上的用户（API 常返回完整 GitHubUser 或字段子集） */
+export type GitHubCommitUser = Pick<GitHubUser, 'login' | 'id' | 'avatar_url' | 'html_url'> &
+  Partial<Omit<GitHubUser, 'login' | 'id' | 'avatar_url' | 'html_url'>>;
+
 // 提交信息
 export interface GitHubCommit {
   sha: string;
@@ -96,8 +109,8 @@ export interface GitHubCommit {
   url: string;
   html_url: string;
   comments_url: string;
-  author: GitHubUser | null;
-  committer: GitHubUser | null;
+  author: GitHubCommitUser | null;
+  committer: GitHubCommitUser | null;
   parents: Array<{
     sha: string;
     url: string;
@@ -130,8 +143,8 @@ export interface GitHubEvent {
     id: number;
     login: string;
     display_login?: string;
-    gravatar_id: string;
-    url: string;
+    gravatar_id?: string;
+    url?: string;
     avatar_url: string;
   };
   repo: {
@@ -200,6 +213,7 @@ export interface GitHubError {
   message: string;
   documentation_url?: string;
   status?: number;
+  githubError?: unknown;
 }
 
 // OAuth Token

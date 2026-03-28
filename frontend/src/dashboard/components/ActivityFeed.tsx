@@ -129,7 +129,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
       {/* 活动列表 */}
       <div className="space-y-4">
         {filteredActivities.length > 0 ? (
-          filteredActivities.map((activity, index) => {
+          filteredActivities.map((activity) => {
             const eventDescription = getEventDescription(activity);
             const eventTime = formatDate(activity.created_at, 'relative');
             const eventLink = getEventLink(activity);
