@@ -10,6 +10,10 @@ interface ActivityFeedProps {
   activities: GitHubEvent[];
 }
 
+interface PushCommitSummary {
+  message: string;
+}
+
 const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
   const [eventType, setEventType] = useState<string>('all');
 
@@ -104,8 +108,8 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
   };
 
   return (
-    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/85">
-      <div className="flex justify-between items-center mb-6">
+    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-card backdrop-blur-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900/85">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-xl font-bold text-gray-900">活动动态</h3>
           <p className="text-sm text-gray-600 mt-1">最近的GitHub活动记录</p>
@@ -115,7 +119,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
         <select
           value={eventType}
           onChange={(e) => setEventType(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
         >
           <option value="all">所有活动</option>
           {eventTypes.filter(type => type !== 'all').map(type => (
@@ -148,7 +152,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
 
                 {/* 事件内容 */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="font-medium text-gray-900">
                         <a
@@ -164,13 +168,13 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                         {eventDescription}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                    <span className="text-xs text-gray-500 sm:ml-2 sm:whitespace-nowrap">
                       {eventTime}
                     </span>
                   </div>
 
                   {/* 仓库信息和链接 */}
-                  <div className="flex items-center justify-between mt-2">
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center text-xs text-gray-500">
                       <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -197,7 +201,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                       {activity.type === 'PushEvent' && activity.payload.commits && (
                         <div className="bg-gray-50 rounded p-2 text-xs">
                           <div className="font-medium text-gray-700 mb-1">提交信息：</div>
-                          {activity.payload.commits.slice(0, 2).map((commit: any, idx: number) => (
+                          {(activity.payload.commits as PushCommitSummary[]).slice(0, 2).map((commit, idx: number) => (
                             <div key={idx} className="truncate text-gray-600">
                               • {commit.message.split('\n')[0]}
                             </div>
@@ -244,8 +248,8 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
       </div>
 
       {/* 底部统计 */}
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <div className="flex justify-between items-center text-sm text-gray-600">
+      <div className="mt-6 border-t border-gray-200 pt-6">
+        <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
           <div>
             显示 <span className="font-semibold text-gray-900">{filteredActivities.length}</span> 个活动
             {eventType !== 'all' && `（${getEventTypeChinese(eventType)}）`}

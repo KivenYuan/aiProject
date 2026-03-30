@@ -20,7 +20,7 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
 
   return (
     <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm md:p-8 dark:border-slate-700 dark:bg-slate-900/85">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
         {/* 仓库数量 */}
         <div className="rounded-xl border border-blue-100/80 bg-gradient-to-br from-blue-50 to-indigo-50/80 p-4">
           <div className="flex items-center justify-between">
@@ -87,7 +87,7 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
       </div>
 
       {/* 详细统计 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* 语言分布 */}
         <div className="md:col-span-2">
           <h3 className="mb-4 text-lg font-semibold tracking-tight text-slate-900">主要语言分布</h3>
@@ -177,7 +177,7 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
 
       {/* 用户信息 */}
       <div className="mt-8 border-t border-slate-200 pt-8 dark:border-slate-700">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center space-x-4">
             <img
               src={user.avatar_url}
@@ -186,7 +186,11 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
             />
             <div>
               <h4 className="font-bold text-gray-900">{user.name || user.login}</h4>
-              <p className="text-sm text-gray-600">@{user.login} • {user.public_repos} 仓库 • {user.followers} 粉丝</p>
+              <p className="text-sm text-gray-600">
+                @{user.login}
+                <span className="hidden sm:inline"> • {user.public_repos} 仓库 • {user.followers} 粉丝</span>
+              </p>
+              <p className="text-xs text-gray-500 sm:hidden">{user.public_repos} 仓库 • {user.followers} 粉丝</p>
               {user.bio && (
                 <p className="text-sm text-gray-500 mt-1">{user.bio}</p>
               )}
@@ -196,7 +200,7 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
             href={user.html_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:bg-slate-800"
+            className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:bg-slate-800 sm:w-auto"
           >
             查看GitHub
           </a>

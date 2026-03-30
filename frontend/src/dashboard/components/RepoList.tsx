@@ -58,19 +58,19 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
   };
 
   return (
-    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/85">
-      <div className="flex justify-between items-center mb-6">
+    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-card backdrop-blur-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900/85">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-xl font-bold text-gray-900">仓库列表</h3>
           <p className="text-sm text-gray-600 mt-1">显示你的GitHub仓库，按活跃度排序</p>
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2">
           {/* 排序选择 */}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'updated' | 'stars' | 'forks')}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
           >
             <option value="updated">最近更新</option>
             <option value="stars">最多星标</option>
@@ -81,7 +81,7 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
           <select
             value={filterLanguage}
             onChange={(e) => setFilterLanguage(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
           >
             {languages.map(lang => (
               <option key={lang} value={lang}>
@@ -106,7 +106,7 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
               key={repo.id}
               className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-300"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
                     <a
@@ -128,7 +128,7 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">{repo.description}</p>
                   )}
 
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
                     {/* 语言 */}
                     {repo.language && (
                       <div className="flex items-center">
@@ -167,7 +167,7 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
                 </div>
 
                 {/* 活跃度标签 */}
-                <div className={`px-3 py-1 text-xs font-medium rounded-full ${activityColor}`}>
+                <div className={`inline-flex w-fit px-3 py-1 text-xs font-medium rounded-full ${activityColor}`}>
                   {activityLabel}
                 </div>
               </div>
@@ -196,8 +196,8 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
       </div>
 
       {/* 底部统计 */}
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <div className="flex justify-between items-center text-sm text-gray-600">
+      <div className="mt-6 border-t border-gray-200 pt-6">
+        <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
           <div>
             显示 <span className="font-semibold text-gray-900">{filteredRepos.length}</span> 个仓库中的 
             <span className="font-semibold text-gray-900 ml-1">{repos.length}</span> 个

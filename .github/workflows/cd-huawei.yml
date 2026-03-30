@@ -1,0 +1,82 @@
+name: CD Huawei ECS
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Huawei ECS
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run remote deploy script
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEPLOY_DOMAIN: ${{ secrets.DEPLOY_DOMAIN }}
+          REPO_SSH: ${{ secrets.REPO_SSH }}
+          PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
+          GIT_BRANCH: ${{ secrets.GIT_BRANCH }}
+          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          ENABLE_HTTPS: ${{ secrets.ENABLE_HTTPS }}
+          EMAIL_FOR_LETSENCRYPT: ${{ secrets.EMAIL_FOR_LETSENCRYPT }}
+          NODE_MAJOR: ${{ secrets.NODE_MAJOR }}
+          BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+        with:
+          host: ${{ secrets.HUAWEI_HOST }}
+          username: ${{ secrets.HUAWEI_USER }}
+          key: ${{ secrets.HUAWEI_SSH_KEY }}
+          port: ${{ secrets.HUAWEI_SSH_PORT }}
+          envs: DEPLOY_DOMAIN,REPO_SSH,PROJECT_DIR,GIT_BRANCH,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,JWT_SECRET,SESSION_SECRET,ENABLE_HTTPS,EMAIL_FOR_LETSENCRYPT,NODE_MAJOR,BACKEND_PORT
+          script_stop: true
+          command_timeout: 60m
+          script: |
+            set -euo pipefail
+
+            PROJECT_DIR="${PROJECT_DIR:-/var/www/ai-project}"
+            DEPLOY_DOMAIN="${DEPLOY_DOMAIN:-example.com}"
+            REPO_SSH="${REPO_SSH:-git@github.com:KivenYuan/aiProject.git}"
+            GIT_BRANCH="${GIT_BRANCH:-master}"
+            ENABLE_HTTPS="${ENABLE_HTTPS:-true}"
+            NODE_MAJOR="${NODE_MAJOR:-20}"
+            BACKEND_PORT="${BACKEND_PORT:-3000}"
+
+            mkdir -p "$PROJECT_DIR"
+            cd "$PROJECT_DIR"
+
+            if [ ! -d .git ]; then
+              git clone "$REPO_SSH" .
+            fi
+
+            git fetch --all
+            git checkout "$GIT_BRANCH"
+            git pull origin "$GIT_BRANCH"
+
+            cat > deploy-huawei.local.sh <<EOF
+            DOMAIN="${DEPLOY_DOMAIN}"
+            REPO_SSH="${REPO_SSH}"
+            PROJECT_DIR="${PROJECT_DIR}"
+            GITHUB_CLIENT_ID="${GITHUB_CLIENT_ID}"
+            GITHUB_CLIENT_SECRET="${GITHUB_CLIENT_SECRET}"
+            JWT_SECRET="${JWT_SECRET}"
+            SESSION_SECRET="${SESSION_SECRET}"
+            ENABLE_HTTPS="${ENABLE_HTTPS}"
+            EMAIL_FOR_LETSENCRYPT="${EMAIL_FOR_LETSENCRYPT}"
+            NODE_MAJOR="${NODE_MAJOR}"
+            BACKEND_PORT="${BACKEND_PORT}"
+            GIT_BRANCH="${GIT_BRANCH}"
+            EOF
+            chmod 600 deploy-huawei.local.sh
+
+            bash deploy-huawei.sh

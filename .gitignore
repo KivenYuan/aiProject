@@ -44,3 +44,7 @@ jest-coverage/
 
 # Legacy folder name (safe to delete locally after copying .env to backend/)
 /ai-backend/
+
+# Deploy: keep secrets in local override only
+deploy-huawei.local.sh
+deploy-huawei.sh

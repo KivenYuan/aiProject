@@ -36,7 +36,7 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
 
   // 获取仓库名从提交URL
   const getRepoNameFromUrl = (url: string): string => {
-    const match = url.match(/repos\/([^\/]+\/[^\/]+)\//);
+    const match = url.match(/repos\/([^/]+\/[^/]+)\//);
     return match ? match[1] : 'unknown';
   };
 
@@ -57,8 +57,8 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
   };
 
   return (
-    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/85">
-      <div className="flex justify-between items-center mb-6">
+    <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-card backdrop-blur-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900/85">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-xl font-bold text-gray-900">提交时间线</h3>
           <p className="text-sm text-gray-600 mt-1">最近的代码提交记录</p>
@@ -68,7 +68,7 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
         <select
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
         >
           <option value="all">所有日期</option>
           {dateOptions.filter(date => date !== 'all').map(date => (
@@ -102,7 +102,7 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
                 {/* 提交卡片 */}
                 <div className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors">
                   {/* 提交标题 */}
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <h4 className="font-medium text-gray-900 pr-4">
                       <a 
                         href={commit.html_url} 
@@ -168,8 +168,8 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
 
                   {/* 代码变更统计 */}
                   {(lineChanges.additions > 0 || lineChanges.deletions > 0) && (
-                    <div className="flex items-center mt-3">
-                      <div className="flex-1 flex space-x-1">
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-1 flex-wrap gap-2">
                         {/* 增加行数 */}
                         {lineChanges.additions > 0 && (
                           <div className="flex items-center text-xs">
@@ -198,7 +198,7 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
                       </div>
 
                       {/* 总变更行数 */}
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 sm:whitespace-nowrap">
                         共 {lineChanges.additions + lineChanges.deletions} 行
                       </div>
                     </div>
@@ -220,8 +220,8 @@ const CommitTimeline: React.FC<CommitTimelineProps> = ({ commits }) => {
       </div>
 
       {/* 底部统计 */}
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <div className="flex justify-between items-center text-sm text-gray-600">
+      <div className="mt-6 border-t border-gray-200 pt-6">
+        <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
           <div>
             显示 <span className="font-semibold text-gray-900">{filteredCommits.length}</span> 个提交
             {selectedDate !== 'all' && `（${selectedDate}）`}

@@ -12,8 +12,8 @@ function AppShell() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 bg-mesh-light font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <NavLink to="/dashboard" className="group flex items-center gap-3 text-left">
+        <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 sm:py-0 lg:px-8">
+          <NavLink to="/dashboard" className="group flex min-w-0 items-center gap-3 text-left">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-indigo-700 text-sm font-bold text-white shadow-soft ring-1 ring-white/20">
               DM
             </span>
@@ -21,17 +21,17 @@ function AppShell() {
               <span className="text-base font-semibold tracking-tight text-slate-900 group-hover:text-brand-700 dark:text-slate-100">
                 Dev Metrics
               </span>
-              <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <span className="hidden text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:block">
                 Portfolio · GitHub 数据看板
               </span>
             </span>
           </NavLink>
 
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav className="flex w-full items-center justify-end gap-1 sm:w-auto sm:gap-2">
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="rounded-lg px-2.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white sm:px-3"
               title={isDark ? '切换到浅色模式' : '切换到深色模式'}
             >
               {isDark ? '浅色' : '深色'}
@@ -40,7 +40,7 @@ function AppShell() {
               to="/dashboard"
               className={({ isActive }) =>
                 [
-                  'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  'rounded-lg px-2.5 py-2 text-sm font-medium transition-colors sm:px-3',
                   isActive
                     ? 'bg-brand-50 text-brand-800 ring-1 ring-brand-200/80 dark:bg-brand-900/40 dark:text-brand-200 dark:ring-brand-700/60'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white',
@@ -53,7 +53,7 @@ function AppShell() {
               to="/auth"
               className={({ isActive }) =>
                 [
-                  'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  'rounded-lg px-2.5 py-2 text-sm font-medium transition-colors sm:px-3',
                   isActive
                     ? 'bg-brand-50 text-brand-800 ring-1 ring-brand-200/80 dark:bg-brand-900/40 dark:text-brand-200 dark:ring-brand-700/60'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white',
