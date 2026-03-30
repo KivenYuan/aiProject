@@ -38,10 +38,11 @@ const config = {
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.test.json',
-        useESM: false,
+        useESM: true,
       },
     ],
   },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   
   // 覆盖率配置
   collectCoverageFrom: [

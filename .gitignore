@@ -47,4 +47,8 @@ jest-coverage/
 
 # Deploy: keep secrets in local override only
 deploy-huawei.local.sh
+
+# Python caches
+__pycache__/
+*.pyc
 deploy-huawei.sh

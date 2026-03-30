@@ -34,7 +34,7 @@ jobs:
         run: npm run type-check --if-present
 
       - name: Run tests
-        run: npm run test:ci --if-present
+        run: npm run test --if-present
 
       - name: Build
         run: npm run build

@@ -5,8 +5,14 @@
 
 import type { LoginRequest, RegisterRequest, AuthResponse, User } from '../types/auth.types';
 
-// API基础URL（从环境变量获取）
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
+type AppEnv = {
+  __APP_ENV__?: {
+    VITE_API_BASE?: string;
+  };
+};
+
+// API基础URL（优先从运行时注入变量读取，避免在 Jest CJS 下直接解析 import.meta）
+const API_BASE = ((globalThis as AppEnv).__APP_ENV__?.VITE_API_BASE || 'http://localhost:3000/api');
 
 /**
  * 通用的API请求函数
