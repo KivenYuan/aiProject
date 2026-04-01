@@ -25,8 +25,8 @@ jobs:
           REPO_SSH: ${{ secrets.REPO_SSH }}
           PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
           GIT_BRANCH: ${{ secrets.GIT_BRANCH }}
-          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           ENABLE_HTTPS: ${{ secrets.ENABLE_HTTPS }}
@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.DEPLOY_SSH_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_SSH_PORT }}
-          envs: DEPLOY_DOMAIN,REPO_SSH,PROJECT_DIR,GIT_BRANCH,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,JWT_SECRET,SESSION_SECRET,ENABLE_HTTPS,EMAIL_FOR_LETSENCRYPT,NODE_MAJOR,BACKEND_PORT
+          envs: DEPLOY_DOMAIN,REPO_SSH,PROJECT_DIR,GIT_BRANCH,CLIENT_ID,CLIENT_SECRET,JWT_SECRET,SESSION_SECRET,ENABLE_HTTPS,EMAIL_FOR_LETSENCRYPT,NODE_MAJOR,BACKEND_PORT
           script_stop: true
           command_timeout: 60m
           script: |
