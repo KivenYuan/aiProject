@@ -47,9 +47,9 @@ jest-coverage/
 
 # Deploy: keep secrets in local override only
 deploy.local.sh
+deploy/deploy.local.sh
 
 # Python caches
 __pycache__/
 *.pyc
-deploy-remote.sh
-deploy.local.sh.example
+deploy/deploy.local.sh.example
