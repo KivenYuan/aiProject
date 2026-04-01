@@ -130,7 +130,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className={shell}>
-      <section className={`${card} px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10`}>
+      <section className={`${card} px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10 mt-5`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3 sm:gap-4">
             <img
