@@ -18,6 +18,43 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
     steps:
+      - name: Debug — print variables
+        env:
+          _DEBUG_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          echo "=== github context ==="
+          echo "github.event_name=${{ github.event_name }}"
+          echo "github.ref=${{ github.ref }}"
+          echo "github.sha=${{ github.sha }}"
+          echo "github.repository=${{ github.repository }}"
+          echo "github.actor=${{ github.actor }}"
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "github.event.workflow_run.conclusion=${{ github.event.workflow_run.conclusion }}"
+            echo "github.event.workflow_run.head_branch=${{ github.event.workflow_run.head_branch }}"
+            echo "github.event.workflow_run.name=${{ github.event.workflow_run.name }}"
+            echo "github.event.workflow_run.html_url=${{ github.event.workflow_run.html_url }}"
+          fi
+          echo ""
+          echo "=== appleboy/ssh-action with.* (GitHub masks secret values in logs) ==="
+          echo "DEPLOY_SSH_HOST=${{ secrets.DEPLOY_SSH_HOST }}"
+          echo "DEPLOY_SSH_USER=${{ secrets.DEPLOY_SSH_USER }}"
+          echo "DEPLOY_SSH_PORT=${{ secrets.DEPLOY_SSH_PORT }}"
+          echo "DEPLOY_SSH_KEY_char_count=${#_DEBUG_SSH_KEY}"
+          echo ""
+          echo "=== env passed to remote script (same masking applies) ==="
+          echo "DEPLOY_DOMAIN=${{ secrets.DEPLOY_DOMAIN }}"
+          echo "REPO_SSH=${{ secrets.REPO_SSH }}"
+          echo "PROJECT_DIR=${{ secrets.PROJECT_DIR }}"
+          echo "GIT_BRANCH=${{ secrets.GIT_BRANCH }}"
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}"
+          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}"
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}"
+          echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}"
+          echo "ENABLE_HTTPS=${{ secrets.ENABLE_HTTPS }}"
+          echo "EMAIL_FOR_LETSENCRYPT=${{ secrets.EMAIL_FOR_LETSENCRYPT }}"
+          echo "NODE_MAJOR=${{ secrets.NODE_MAJOR }}"
+          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}"
+
       - name: Run remote deploy script
         uses: appleboy/ssh-action@v1.2.0
         env:
@@ -51,6 +88,21 @@ jobs:
             ENABLE_HTTPS="${ENABLE_HTTPS:-true}"
             NODE_MAJOR="${NODE_MAJOR:-20}"
             BACKEND_PORT="${BACKEND_PORT:-3000}"
+
+            echo "=== remote: values after defaults (secrets not echoed — avoid leaking into Actions log) ==="
+            echo "PROJECT_DIR=$PROJECT_DIR"
+            echo "DEPLOY_DOMAIN=$DEPLOY_DOMAIN"
+            echo "GIT_BRANCH=$GIT_BRANCH"
+            echo "ENABLE_HTTPS=$ENABLE_HTTPS"
+            echo "NODE_MAJOR=$NODE_MAJOR"
+            echo "BACKEND_PORT=$BACKEND_PORT"
+            dbg_len_or_empty() { n="$1"; v="$2"; if [ -n "$v" ]; then echo "$n=len=${#v}"; else echo "$n=[empty]"; fi; }
+            dbg_len_or_empty REPO_SSH "$REPO_SSH"
+            dbg_len_or_empty CLIENT_ID "$CLIENT_ID"
+            dbg_len_or_empty CLIENT_SECRET "$CLIENT_SECRET"
+            dbg_len_or_empty JWT_SECRET "$JWT_SECRET"
+            dbg_len_or_empty SESSION_SECRET "$SESSION_SECRET"
+            dbg_len_or_empty EMAIL_FOR_LETSENCRYPT "$EMAIL_FOR_LETSENCRYPT"
 
             mkdir -p "$PROJECT_DIR"
             cd "$PROJECT_DIR"
