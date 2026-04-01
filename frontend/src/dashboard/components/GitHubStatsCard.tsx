@@ -23,11 +23,11 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
     <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-card backdrop-blur-sm sm:p-6 md:p-8 dark:border-slate-700 dark:bg-slate-900/85">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
         {/* 仓库数量 */}
-        <div className="rounded-xl border border-blue-100/80 bg-gradient-to-br from-blue-50 to-indigo-50/80 p-3 sm:p-4">
+        <div className="rounded-xl border border-blue-100/80 bg-gradient-to-br from-blue-50 to-indigo-50/80 p-3 sm:p-4 dark:border-blue-500/25 dark:from-slate-900/90 dark:to-blue-950/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-blue-700 sm:text-sm">仓库</p>
-              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">{formatNumber(repoCount)}</p>
+              <p className="text-xs font-medium text-blue-700 sm:text-sm dark:text-blue-300">仓库</p>
+              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-slate-50">{formatNumber(repoCount)}</p>
             </div>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500 sm:h-10 sm:w-10">
               <svg className="h-4 w-4 text-white sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -35,15 +35,15 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
               </svg>
             </div>
           </div>
-          <p className="mt-2 hidden text-xs text-blue-600 sm:block">公开仓库数量</p>
+          <p className="mt-2 hidden text-xs text-blue-600 sm:block dark:text-blue-400">公开仓库数量</p>
         </div>
 
         {/* Star数量 */}
-        <div className="rounded-xl border border-amber-100/80 bg-gradient-to-br from-amber-50 to-yellow-50/90 p-3 sm:p-4">
+        <div className="rounded-xl border border-amber-100/80 bg-gradient-to-br from-amber-50 to-yellow-50/90 p-3 sm:p-4 dark:border-amber-500/25 dark:from-slate-900/90 dark:to-amber-950/45">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-yellow-700 sm:text-sm">Star</p>
-              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">{formatNumber(starCount)}</p>
+              <p className="text-xs font-medium text-yellow-700 sm:text-sm dark:text-amber-200">Star</p>
+              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-slate-50">{formatNumber(starCount)}</p>
             </div>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-500 sm:h-10 sm:w-10">
               <svg className="h-4 w-4 text-white sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -51,15 +51,15 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
               </svg>
             </div>
           </div>
-          <p className="mt-2 hidden text-xs text-yellow-600 sm:block">获得星标总数</p>
+          <p className="mt-2 hidden text-xs text-yellow-600 sm:block dark:text-amber-300">获得星标总数</p>
         </div>
 
         {/* 提交数量 */}
-        <div className="rounded-xl border border-emerald-100/80 bg-gradient-to-br from-emerald-50 to-green-50/80 p-3 sm:p-4">
+        <div className="rounded-xl border border-emerald-100/80 bg-gradient-to-br from-emerald-50 to-green-50/80 p-3 sm:p-4 dark:border-emerald-500/25 dark:from-slate-900/90 dark:to-emerald-950/45">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-green-700 sm:text-sm">提交</p>
-              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">{formatNumber(totalCommits)}</p>
+              <p className="text-xs font-medium text-green-700 sm:text-sm dark:text-emerald-300">提交</p>
+              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-slate-50">{formatNumber(totalCommits)}</p>
             </div>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500 sm:h-10 sm:w-10">
               <svg className="h-4 w-4 text-white sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,15 +67,15 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
               </svg>
             </div>
           </div>
-          <p className="mt-2 hidden text-xs text-green-600 sm:block">总提交次数</p>
+          <p className="mt-2 hidden text-xs text-green-600 sm:block dark:text-emerald-400">总提交次数</p>
         </div>
 
         {/* Fork数量 */}
-        <div className="rounded-xl border border-violet-100/80 bg-gradient-to-br from-violet-50 to-purple-50/80 p-3 sm:p-4">
+        <div className="rounded-xl border border-violet-100/80 bg-gradient-to-br from-violet-50 to-purple-50/80 p-3 sm:p-4 dark:border-violet-500/25 dark:from-slate-900/90 dark:to-violet-950/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-purple-700 sm:text-sm">Fork</p>
-              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">{formatNumber(forkCount)}</p>
+              <p className="text-xs font-medium text-purple-700 sm:text-sm dark:text-violet-300">Fork</p>
+              <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-slate-50">{formatNumber(forkCount)}</p>
             </div>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500 sm:h-10 sm:w-10">
               <svg className="h-4 w-4 text-white sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,7 +83,7 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
               </svg>
             </div>
           </div>
-          <p className="mt-2 hidden text-xs text-purple-600 sm:block">被复刻次数</p>
+          <p className="mt-2 hidden text-xs text-purple-600 sm:block dark:text-violet-400">被复刻次数</p>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
       <div className="mt-6 grid grid-cols-1 gap-6 sm:mt-8 md:grid-cols-3">
         {/* 语言分布 */}
         <div className="md:col-span-2">
-          <h3 className="mb-4 text-base font-semibold tracking-tight text-slate-900 sm:text-lg">主要语言分布</h3>
+          <h3 className="mb-4 text-base font-semibold tracking-tight text-slate-900 sm:text-lg dark:text-slate-100">主要语言分布</h3>
           <div className="space-y-3">
             {topLanguages.map(([lang, bytes]) => {
               const percentage = (bytes / Object.values(languages).reduce((a, b) => a + b, 0)) * 100;
@@ -101,11 +101,11 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
                   <div className="flex justify-between text-sm">
                     <div className="flex items-center">
                       <div className="mr-2 h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-                      <span className="font-medium text-gray-700">{lang}</span>
+                      <span className="font-medium text-gray-700 dark:text-slate-200">{lang}</span>
                     </div>
-                    <span className="text-gray-600">{percentage.toFixed(1)}%</span>
+                    <span className="text-gray-600 dark:text-slate-400">{percentage.toFixed(1)}%</span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                  <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{ width: `${percentage}%`, backgroundColor: color }}
@@ -119,51 +119,51 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
 
         {/* 其他统计 */}
         <div>
-          <h3 className="mb-4 text-base font-semibold tracking-tight text-slate-900 sm:text-lg">活动统计</h3>
+          <h3 className="mb-4 text-base font-semibold tracking-tight text-slate-900 sm:text-lg dark:text-slate-100">活动统计</h3>
           <div className="space-y-3 sm:space-y-4">
-            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-600/50 dark:bg-slate-800/60">
               <div className="flex items-center">
-                <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
-                  <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/80">
+                  <svg className="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Issues</p>
-                  <p className="hidden text-xs text-gray-500 sm:block">创建的问题</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-slate-200">Issues</p>
+                  <p className="hidden text-xs text-gray-500 sm:block dark:text-slate-400">创建的问题</p>
                 </div>
               </div>
-              <span className="text-lg font-bold text-gray-900">{formatNumber(issueCount)}</span>
+              <span className="text-lg font-bold text-gray-900 dark:text-slate-50">{formatNumber(issueCount)}</span>
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-600/50 dark:bg-slate-800/60">
               <div className="flex items-center">
-                <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
-                  <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-emerald-950/80">
+                  <svg className="h-4 w-4 text-green-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">PRs</p>
-                  <p className="hidden text-xs text-gray-500 sm:block">拉取请求</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-slate-200">PRs</p>
+                  <p className="hidden text-xs text-gray-500 sm:block dark:text-slate-400">拉取请求</p>
                 </div>
               </div>
-              <span className="text-lg font-bold text-gray-900">{formatNumber(prCount)}</span>
+              <span className="text-lg font-bold text-gray-900 dark:text-slate-50">{formatNumber(prCount)}</span>
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-600/50 dark:bg-slate-800/60">
               <div className="flex items-center">
-                <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100">
-                  <svg className="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-violet-950/80">
+                  <svg className="h-4 w-4 text-purple-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">活跃天数</p>
-                  <p className="hidden text-xs text-gray-500 sm:block">最近30天</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-slate-200">活跃天数</p>
+                  <p className="hidden text-xs text-gray-500 sm:block dark:text-slate-400">最近30天</p>
                 </div>
               </div>
-              <span className="text-lg font-bold text-gray-900">--</span>
+              <span className="text-lg font-bold text-gray-900 dark:text-slate-50">--</span>
             </div>
           </div>
         </div>
@@ -179,14 +179,14 @@ const GitHubStatsCard: React.FC<GitHubStatsCardProps> = ({ stats }) => {
               className="h-10 w-10 shrink-0 rounded-full border-2 border-white shadow-md sm:h-12 sm:w-12 dark:border-slate-700"
             />
             <div className="min-w-0">
-              <h4 className="truncate font-bold text-gray-900">{user.name || user.login}</h4>
-              <p className="truncate text-sm text-gray-600">
+              <h4 className="truncate font-bold text-gray-900 dark:text-slate-50">{user.name || user.login}</h4>
+              <p className="truncate text-sm text-gray-600 dark:text-slate-300">
                 @{user.login}
                 <span className="hidden sm:inline"> · {user.public_repos} 仓库 · {user.followers} 粉丝</span>
               </p>
-              <p className="text-xs text-gray-500 sm:hidden">{user.public_repos} 仓库 · {user.followers} 粉丝</p>
+              <p className="text-xs text-gray-500 sm:hidden dark:text-slate-400">{user.public_repos} 仓库 · {user.followers} 粉丝</p>
               {user.bio && (
-                <p className="mt-1 hidden text-sm text-gray-500 sm:block">{user.bio}</p>
+                <p className="mt-1 hidden text-sm text-gray-500 sm:block dark:text-slate-400">{user.bio}</p>
               )}
             </div>
           </div>

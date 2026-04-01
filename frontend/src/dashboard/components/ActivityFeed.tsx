@@ -94,35 +94,45 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
 
   const getEventColor = (type: string): string => {
     const colorMap: Record<string, string> = {
-      'PushEvent': 'bg-blue-100 text-blue-800',
-      'CreateEvent': 'bg-green-100 text-green-800',
-      'DeleteEvent': 'bg-red-100 text-red-800',
-      'ForkEvent': 'bg-purple-100 text-purple-800',
-      'IssuesEvent': 'bg-yellow-100 text-yellow-800',
-      'IssueCommentEvent': 'bg-indigo-100 text-indigo-800',
-      'PullRequestEvent': 'bg-teal-100 text-teal-800',
-      'PullRequestReviewEvent': 'bg-pink-100 text-pink-800',
-      'PullRequestReviewCommentEvent': 'bg-orange-100 text-orange-800',
-      'WatchEvent': 'bg-amber-100 text-amber-800',
-      'ReleaseEvent': 'bg-cyan-100 text-cyan-800',
-      'PublicEvent': 'bg-gray-100 text-gray-800',
+      'PushEvent': 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-200',
+      'CreateEvent': 'bg-green-100 text-green-800 dark:bg-emerald-950/70 dark:text-emerald-200',
+      'DeleteEvent': 'bg-red-100 text-red-800 dark:bg-red-950/70 dark:text-red-200',
+      'ForkEvent': 'bg-purple-100 text-purple-800 dark:bg-violet-950/70 dark:text-violet-200',
+      'IssuesEvent': 'bg-yellow-100 text-yellow-800 dark:bg-amber-950/60 dark:text-amber-200',
+      'IssueCommentEvent': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/70 dark:text-indigo-200',
+      'PullRequestEvent': 'bg-teal-100 text-teal-800 dark:bg-teal-950/70 dark:text-teal-200',
+      'PullRequestReviewEvent': 'bg-pink-100 text-pink-800 dark:bg-rose-950/70 dark:text-rose-200',
+      'PullRequestReviewCommentEvent': 'bg-orange-100 text-orange-800 dark:bg-orange-950/70 dark:text-orange-200',
+      'WatchEvent': 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200',
+      'ReleaseEvent': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-950/70 dark:text-cyan-200',
+      'PublicEvent': 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-200',
     };
-    return colorMap[type] || 'bg-gray-100 text-gray-800';
+    return colorMap[type] || 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-200';
   };
 
   return (
     <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-card backdrop-blur-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900/85">
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-lg font-bold text-gray-900 sm:text-xl">活动动态</h3>
-          <p className="mt-1 text-xs text-gray-600 sm:text-sm">最近的GitHub活动记录</p>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 sm:text-xl">活动动态</h3>
+          <p className="mt-1 text-xs text-gray-600 dark:text-slate-400 sm:text-sm">最近的GitHub活动记录</p>
         </div>
 
         <Select
           value={eventType}
           onChange={setEventType}
           size="small"
-          className="w-28 sm:w-32"
+          className="activity-feed-type-select min-w-[7rem] sm:min-w-[8rem]"
+          popupMatchSelectWidth={false}
+          styles={{
+            popup: {
+              root: {
+                border: '1px solid rgba(148, 163, 184, 0.45)',
+                borderRadius: 8,
+                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.45)',
+              },
+            },
+          }}
           options={eventTypes.map(type => ({
             value: type,
             label: type === 'all' ? '所有活动' : getEventTypeChinese(type),
@@ -142,7 +152,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
             return (
               <div
                 key={activity.id}
-                className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-gray-50 sm:p-3"
+                className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-gray-50 dark:hover:bg-slate-800/70 sm:p-3"
               >
                 <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${eventColor}`}>
                   <span className="text-base sm:text-lg">{eventIcon}</span>
@@ -151,34 +161,34 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-gray-900">
+                      <p className="truncate font-medium text-gray-900 dark:text-slate-100">
                         <a
                           href={`https://github.com/${activity.actor.login}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="transition-colors hover:text-blue-600"
+                          className="transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           {activity.actor.login}
                         </a>
                       </p>
-                      <p className="mt-0.5 text-xs text-gray-600 sm:mt-1 sm:text-sm">
+                      <p className="mt-0.5 text-xs text-gray-600 dark:text-slate-300 sm:mt-1 sm:text-sm">
                         {eventDescription}
                       </p>
                     </div>
-                    <span className="shrink-0 text-xs text-gray-500">
+                    <span className="shrink-0 text-xs text-gray-500 dark:text-slate-400">
                       {eventTime}
                     </span>
                   </div>
 
                   <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 sm:mt-2">
-                    <div className="flex items-center text-xs text-gray-500">
+                    <div className="flex items-center text-xs text-gray-500 dark:text-slate-400">
                       <span className="max-w-[120px] truncate sm:max-w-[180px]">{activity.repo.name}</span>
                     </div>
                     <a
                       href={eventLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center text-xs font-medium text-blue-600 hover:text-blue-500"
+                      className="flex items-center text-xs font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                       查看详情
                       <svg className="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -191,22 +201,22 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                     activity.type === 'PushEvent' &&
                     Array.isArray(activity.payload.commits) &&
                     activity.payload.commits.length > 0 && (
-                    <div className="mt-2 rounded bg-gray-50 p-2 text-xs">
-                      <div className="mb-1 font-medium text-gray-700">提交信息：</div>
+                    <div className="mt-2 rounded bg-gray-50 p-2 text-xs dark:bg-slate-800/80">
+                      <div className="mb-1 font-medium text-gray-700 dark:text-slate-200">提交信息：</div>
                       {(activity.payload.commits as PushCommitSummary[]).slice(0, 2).map((commit, idx: number) => (
-                        <div key={idx} className="truncate text-gray-600">• {commit.message.split('\n')[0]}</div>
+                        <div key={idx} className="truncate text-gray-600 dark:text-slate-300">• {commit.message.split('\n')[0]}</div>
                       ))}
                       {activity.payload.commits.length > 2 && (
-                        <div className="mt-1 text-gray-500">还有 {activity.payload.commits.length - 2} 个提交...</div>
+                        <div className="mt-1 text-gray-500 dark:text-slate-400">还有 {activity.payload.commits.length - 2} 个提交...</div>
                       )}
                     </div>
                   )}
 
                   {activity.payload && activity.type === 'IssuesEvent' && activity.payload.issue && (
-                    <div className="mt-2 rounded bg-gray-50 p-2 text-xs">
-                      <div className="mb-1 font-medium text-gray-700">{activity.payload.issue.title}</div>
+                    <div className="mt-2 rounded bg-gray-50 p-2 text-xs dark:bg-slate-800/80">
+                      <div className="mb-1 font-medium text-gray-700 dark:text-slate-200">{activity.payload.issue.title}</div>
                       {activity.payload.issue.body && (
-                        <div className="line-clamp-2 text-gray-600">{activity.payload.issue.body}</div>
+                        <div className="line-clamp-2 text-gray-600 dark:text-slate-300">{activity.payload.issue.body}</div>
                       )}
                     </div>
                   )}
@@ -216,18 +226,18 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
           })
         ) : (
           <div className="py-8 text-center">
-            <p className="text-gray-500">没有找到活动记录</p>
+            <p className="text-gray-500 dark:text-slate-400">没有找到活动记录</p>
             {eventType !== 'all' && (
-              <p className="mt-1 text-sm text-gray-400">尝试选择"所有活动"查看全部</p>
+              <p className="mt-1 text-sm text-gray-400 dark:text-slate-500">尝试选择"所有活动"查看全部</p>
             )}
           </div>
         )}
       </div>
 
-      <div className="mt-4 border-t border-gray-200 pt-4 sm:mt-6 sm:pt-6">
-        <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 border-t border-gray-200 pt-4 dark:border-slate-600/60 sm:mt-6 sm:pt-6">
+        <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            显示 <span className="font-semibold text-gray-900">{filteredActivities.length}</span> 个活动
+            显示 <span className="font-semibold text-gray-900 dark:text-slate-100">{filteredActivities.length}</span> 个活动
             {eventType !== 'all' && `（${getEventTypeChinese(eventType)}）`}
           </div>
           {activities.length > 0 && (
@@ -235,7 +245,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
               href={`https://github.com/${activities[0]?.actor?.login || 'user'}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center font-medium text-blue-600 hover:text-blue-500"
+              className="flex items-center font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
             >
               查看所有活动 <ArrowRightOutlined className="ml-1" />
             </a>

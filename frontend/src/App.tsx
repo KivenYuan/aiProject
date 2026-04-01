@@ -138,6 +138,16 @@ function AppShell() {
                 </span>
               ))}
             </div>
+            <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+              <a
+                href="https://beian.miit.gov.cn/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-slate-400/60 underline-offset-2 transition-colors hover:text-slate-700 dark:hover:text-slate-300"
+              >
+                陕ICP备2026006967号-1
+              </a>
+            </p>
           </div>
         </footer>
       </div>

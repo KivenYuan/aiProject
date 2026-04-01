@@ -122,6 +122,44 @@ body {
   border-color: rgb(51 65 85);
 }
 
+/* 活动动态：暗色下 Select 触发器与 hover 行更易辨认 */
+.theme-dark .activity-feed-type-select.ant-select-outlined:not(.ant-select-disabled):hover .ant-select-selector,
+.theme-dark .activity-feed-type-select.ant-select-outlined.ant-select-focused .ant-select-selector {
+  border-color: rgb(148 163 184) !important;
+}
+
+.theme-dark .activity-feed-type-select.ant-select-outlined .ant-select-selector {
+  border-color: rgb(100 116 139);
+}
+
+/* 行 hover 仍为浅灰时覆盖为深色底（与 Tailwind hover:bg-gray-50 配合） */
+.theme-dark .dashboard-panel .hover\:bg-gray-50:hover {
+  background-color: rgba(30, 41, 59, 0.72);
+}
+
+.theme-dark {
+  scrollbar-color: rgb(71 85 105) rgb(15 23 42);
+}
+
+.theme-dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.theme-dark ::-webkit-scrollbar-track {
+  background: rgb(15 23 42);
+}
+
+.theme-dark ::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105);
+  border-radius: 6px;
+  border: 2px solid rgb(15 23 42);
+}
+
+.theme-dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139);
+}
+
 h1,
 h2 {
   font-family: var(--heading);
