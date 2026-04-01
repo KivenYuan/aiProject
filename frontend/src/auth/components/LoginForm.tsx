@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Input, Button, Checkbox, Alert } from 'antd';
+import { MailOutlined, LockOutlined, LoginOutlined, CopyOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { isValidEmail } from '../utils/auth.utils';
 
@@ -15,14 +17,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (name: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: value,
     }));
-    
-    // 清除字段验证错误
+
     if (validationErrors[name]) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -30,8 +30,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
         return newErrors;
       });
     }
-    
-    // 清除全局错误
+
     if (error) clearError();
   };
 
@@ -54,7 +53,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -65,14 +64,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
         password: formData.password,
         rememberMe: formData.rememberMe,
       });
-      // 登录成功后的处理（如重定向）由上层组件处理
-    } catch (error) {
-      // 错误已在AuthContext中处理
-      console.error('登录失败:', error);
+    } catch (err) {
+      console.error('登录失败:', err);
     }
   };
 
-  // 演示账户快速填充
   const fillDemoAccount = () => {
     setFormData({
       email: 'demo@example.com',
@@ -89,181 +85,107 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
         <h2 className="text-lg font-semibold tracking-tight text-slate-900">登录</h2>
         <p className="mt-1 text-sm text-slate-600">请使用邮箱与密码登录</p>
       </div>
-      
+
       {error && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 text-red-700 rounded-r-lg">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="font-medium">{error}</span>
-          </div>
-        </div>
+        <Alert
+          message={error}
+          type="error"
+          showIcon
+          closable
+          onClose={clearError}
+          className="mb-6"
+        />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              邮箱地址
-            </span>
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
+            邮箱地址
           </label>
-          <input
+          <Input
             id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all duration-300 ${
-              validationErrors.email ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-            }`}
+            size="large"
+            prefix={<MailOutlined className="text-gray-400" />}
             placeholder="请输入您的邮箱"
+            value={formData.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            status={validationErrors.email ? 'error' : undefined}
             disabled={isLoading}
           />
           {validationErrors.email && (
-            <p className="mt-2 text-sm text-red-600 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {validationErrors.email}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{validationErrors.email}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              密码
-            </span>
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
+            密码
           </label>
-          <input
+          <Input.Password
             id="password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all duration-300 ${
-              validationErrors.password ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-            }`}
+            size="large"
+            prefix={<LockOutlined className="text-gray-400" />}
             placeholder="请输入您的密码"
+            value={formData.password}
+            onChange={(e) => handleChange('password', e.target.value)}
+            status={validationErrors.password ? 'error' : undefined}
             disabled={isLoading}
           />
           {validationErrors.password && (
-            <p className="mt-2 text-sm text-red-600 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {validationErrors.password}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{validationErrors.password}</p>
           )}
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="relative">
-              <input
-                id="rememberMe"
-                name="rememberMe"
-                type="checkbox"
-                checked={formData.rememberMe}
-                onChange={handleChange}
-                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-all duration-300"
-                disabled={isLoading}
-              />
-            </div>
-            <label htmlFor="rememberMe" className="ml-3 text-sm text-gray-600 hover:text-gray-900 cursor-pointer">
-              记住我
-            </label>
-          </div>
-          <button
-            type="button"
-            className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors duration-300"
+          <Checkbox
+            checked={formData.rememberMe}
+            onChange={(e) => handleChange('rememberMe', e.target.checked)}
+            disabled={isLoading}
+          >
+            记住我
+          </Checkbox>
+          <Button
+            type="link"
+            size="small"
             onClick={() => {
-              console.log('忘记密码功能');
               alert('忘记密码功能开发中，请联系管理员重置密码。');
             }}
           >
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              忘记密码？
-            </span>
-          </button>
+            忘记密码？
+          </Button>
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:-translate-y-0.5 ${
-            isLoading 
-              ? 'bg-gradient-to-r from-blue-400 to-purple-400 opacity-50 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg'
-          }`}
+        <Button
+          type="primary"
+          htmlType="submit"
+          icon={<LoginOutlined />}
+          loading={isLoading}
+          size="large"
+          block
         >
-          {isLoading ? (
-            <span className="flex items-center justify-center">
-              <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              登录中...
-            </span>
-          ) : (
-            <span className="flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              登录
-            </span>
-          )}
-        </button>
+          登录
+        </Button>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <button
-            type="button"
+        <div className="border-t border-gray-200 pt-5">
+          <Button
+            icon={<CopyOutlined />}
             onClick={fillDemoAccount}
-            className="w-full py-3 px-4 border-2 border-dashed border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 hover:border-solid hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300"
+            size="large"
+            block
           >
-            <span className="flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              使用演示账户登录
-            </span>
-          </button>
-          <p className="mt-3 text-xs text-gray-500 text-center">
+            使用演示账户登录
+          </Button>
+          <p className="mt-3 text-center text-xs text-gray-500">
             <span className="font-medium">演示账户：</span>demo@example.com / Demo@123
           </p>
         </div>
       </form>
 
-      <div className="mt-8 pt-8 border-t border-gray-200">
-        <p className="text-sm text-gray-600 text-center">
-          还没有账户？{' '}
-          <button
-            type="button"
-            className="text-blue-600 hover:text-blue-500 font-medium transition-colors duration-300"
-            onClick={() => {
-              if (onSwitchToRegister) {
-                onSwitchToRegister();
-              }
-            }}
-          >
-            <span className="flex items-center justify-center">
-              <span className="underline">立即注册</span>
-              <svg className="w-4 h-4 ml-1 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </span>
-          </button>
-        </p>
+      <div className="mt-8 border-t border-gray-200 pt-8 text-center">
+        <span className="text-sm text-gray-600">还没有账户？</span>{' '}
+        <Button type="link" onClick={onSwitchToRegister} className="px-0">
+          立即注册
+        </Button>
       </div>
     </div>
   );

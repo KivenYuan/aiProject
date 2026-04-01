@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Input, Button, Alert, Progress } from 'antd';
+import { UserOutlined, MailOutlined, LockOutlined, SafetyOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { isValidEmail, validatePassword } from '../utils/auth.utils';
 
@@ -16,14 +18,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
   });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleChange = (name: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
-    
-    // 清除字段验证错误
+
     if (validationErrors[name]) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -31,22 +31,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
         return newErrors;
       });
     }
-    
-    // 清除全局错误
+
     if (error) clearError();
   };
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
-    // 邮箱验证
     if (!formData.email.trim()) {
       errors.email = '邮箱不能为空';
     } else if (!isValidEmail(formData.email)) {
       errors.email = '请输入有效的邮箱地址';
     }
 
-    // 密码验证
     if (!formData.password) {
       errors.password = '密码不能为空';
     } else {
@@ -56,14 +53,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
       }
     }
 
-    // 确认密码验证
     if (!formData.confirmPassword) {
       errors.confirmPassword = '请确认密码';
     } else if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = '两次输入的密码不一致';
     }
 
-    // 姓名验证（可选）
     if (formData.name && formData.name.length > 50) {
       errors.name = '姓名不能超过50个字符';
     }
@@ -74,7 +69,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -85,47 +80,20 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
         password: formData.password,
         name: formData.name || undefined,
       });
-      // 注册成功后的处理（如重定向）由上层组件处理
-    } catch (error) {
-      // 错误已在AuthContext中处理
-      console.error('注册失败:', error);
+    } catch (err) {
+      console.error('注册失败:', err);
     }
   };
 
-  // 密码强度指示器
-  const renderPasswordStrength = () => {
-    if (!formData.password) return null;
-    
+  const getPasswordStrength = (): { percent: number; status: 'exception' | 'success' | 'active' } => {
+    if (!formData.password) return { percent: 0, status: 'active' };
     const validation = validatePassword(formData.password);
-    
-    return (
-      <div className="mt-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs font-medium text-gray-700">密码强度：</span>
-          <span className={`text-xs font-medium ${validation.valid ? 'text-green-600' : 'text-red-600'}`}>
-            {validation.valid ? '强' : '弱'}
-          </span>
-        </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className={`h-full transition-all duration-500 ${
-              validation.valid 
-                ? 'w-full bg-gradient-to-r from-green-400 to-green-600' 
-                : 'w-1/3 bg-gradient-to-r from-red-400 to-red-600'
-            }`}
-          />
-        </div>
-        {!validation.valid && (
-          <p className="text-xs text-red-600 mt-2 flex items-center">
-            <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {validation.message}
-          </p>
-        )}
-      </div>
-    );
+    return validation.valid
+      ? { percent: 100, status: 'success' }
+      : { percent: 33, status: 'exception' };
   };
+
+  const pwStrength = getPasswordStrength();
 
   return (
     <div className="w-full">
@@ -133,238 +101,142 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
         <h2 className="text-lg font-semibold tracking-tight text-slate-900">注册新账户</h2>
         <p className="mt-1 text-sm text-slate-600">创建账户以演示注册与鉴权流程</p>
       </div>
-      
+
       {error && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 text-red-700 rounded-r-lg">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="font-medium">{error}</span>
-          </div>
-        </div>
+        <Alert
+          message={error}
+          type="error"
+          showIcon
+          closable
+          onClose={clearError}
+          className="mb-6"
+        />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              姓名（可选）
-            </span>
+          <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700">
+            姓名（可选）
           </label>
-          <input
+          <Input
             id="name"
-            name="name"
-            type="text"
-            value={formData.name}
-            onChange={handleChange}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all duration-300 ${
-              validationErrors.name ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-            }`}
+            size="large"
+            prefix={<UserOutlined className="text-gray-400" />}
             placeholder="请输入您的姓名"
+            value={formData.name}
+            onChange={(e) => handleChange('name', e.target.value)}
+            status={validationErrors.name ? 'error' : undefined}
             disabled={isLoading}
           />
           {validationErrors.name && (
-            <p className="mt-2 text-sm text-red-600 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {validationErrors.name}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{validationErrors.name}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              邮箱地址
-            </span>
+          <label htmlFor="reg-email" className="mb-2 block text-sm font-medium text-gray-700">
+            邮箱地址
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all duration-300 ${
-              validationErrors.email ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-            }`}
+          <Input
+            id="reg-email"
+            size="large"
+            prefix={<MailOutlined className="text-gray-400" />}
             placeholder="请输入您的邮箱"
+            value={formData.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            status={validationErrors.email ? 'error' : undefined}
             disabled={isLoading}
           />
           {validationErrors.email && (
-            <p className="mt-2 text-sm text-red-600 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {validationErrors.email}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{validationErrors.email}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              密码
-            </span>
+          <label htmlFor="reg-password" className="mb-2 block text-sm font-medium text-gray-700">
+            密码
           </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
+          <Input.Password
+            id="reg-password"
+            size="large"
+            prefix={<LockOutlined className="text-gray-400" />}
+            placeholder="至少8位，含大小写字母和数字"
             value={formData.password}
-            onChange={handleChange}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all duration-300 ${
-              validationErrors.password ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-            }`}
-            placeholder="请输入密码（至少8位，包含大小写字母和数字）"
+            onChange={(e) => handleChange('password', e.target.value)}
+            status={validationErrors.password ? 'error' : undefined}
             disabled={isLoading}
           />
-          {renderPasswordStrength()}
+          {formData.password && (
+            <div className="mt-2">
+              <Progress
+                percent={pwStrength.percent}
+                status={pwStrength.status}
+                size="small"
+                showInfo={false}
+              />
+              <p className={`mt-1 text-xs ${pwStrength.status === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+                密码强度：{pwStrength.status === 'success' ? '强' : '弱'}
+              </p>
+            </div>
+          )}
           {validationErrors.password && !formData.password && (
-            <p className="mt-2 text-sm text-red-600 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {validationErrors.password}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{validationErrors.password}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              确认密码
-            </span>
+          <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-700">
+            确认密码
           </label>
-          <input
+          <Input.Password
             id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-all duration-300 ${
-              validationErrors.confirmPassword ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-            }`}
+            size="large"
+            prefix={<SafetyOutlined className="text-gray-400" />}
             placeholder="请再次输入密码"
+            value={formData.confirmPassword}
+            onChange={(e) => handleChange('confirmPassword', e.target.value)}
+            status={validationErrors.confirmPassword ? 'error' : undefined}
             disabled={isLoading}
           />
           {validationErrors.confirmPassword && (
-            <p className="mt-2 text-sm text-red-600 flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {validationErrors.confirmPassword}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{validationErrors.confirmPassword}</p>
           )}
         </div>
 
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-4">
-          <p className="text-sm font-medium text-gray-700 mb-3">密码要求：</p>
+        <div className="rounded-xl bg-gradient-to-r from-blue-50 to-green-50 p-4">
+          <p className="mb-3 text-sm font-medium text-gray-700">密码要求：</p>
           <div className="grid grid-cols-2 gap-2">
-            <div className={`flex items-center ${formData.password.length >= 8 ? 'text-green-600' : 'text-gray-500'}`}>
-              <svg className={`w-4 h-4 mr-2 ${formData.password.length >= 8 ? 'text-green-500' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {formData.password.length >= 8 ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                )}
-              </svg>
-              <span className="text-xs">至少8个字符</span>
-            </div>
-            <div className={`flex items-center ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
-              <svg className={`w-4 h-4 mr-2 ${/[A-Z]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {/[A-Z]/.test(formData.password) ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                )}
-              </svg>
-              <span className="text-xs">至少一个大写字母</span>
-            </div>
-            <div className={`flex items-center ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
-              <svg className={`w-4 h-4 mr-2 ${/[a-z]/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {/[a-z]/.test(formData.password) ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                )}
-              </svg>
-              <span className="text-xs">至少一个小写字母</span>
-            </div>
-            <div className={`flex items-center ${/\d/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
-              <svg className={`w-4 h-4 mr-2 ${/\d/.test(formData.password) ? 'text-green-500' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {/\d/.test(formData.password) ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                )}
-              </svg>
-              <span className="text-xs">至少一个数字</span>
-            </div>
+            {[
+              { check: formData.password.length >= 8, label: '至少8个字符' },
+              { check: /[A-Z]/.test(formData.password), label: '大写字母' },
+              { check: /[a-z]/.test(formData.password), label: '小写字母' },
+              { check: /\d/.test(formData.password), label: '至少一个数字' },
+            ].map(({ check, label }) => (
+              <div key={label} className={`flex items-center text-xs ${check ? 'text-green-600' : 'text-gray-500'}`}>
+                {check ? '✓' : '✗'}
+                <span className="ml-1.5">{label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 transform hover:-translate-y-0.5 ${
-            isLoading 
-              ? 'bg-gradient-to-r from-green-400 to-blue-400 opacity-50 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 hover:shadow-lg'
-          }`}
+        <Button
+          type="primary"
+          htmlType="submit"
+          icon={<UserAddOutlined />}
+          loading={isLoading}
+          size="large"
+          block
         >
-          {isLoading ? (
-            <span className="flex items-center justify-center">
-              <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              注册中...
-            </span>
-          ) : (
-            <span className="flex items-center justify-center">
-              <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              注册
-            </span>
-          )}
-        </button>
+          注册
+        </Button>
       </form>
 
-      <div className="mt-8 pt-8 border-t border-gray-200">
-        <p className="text-sm text-gray-600 text-center">
-          已有账户？{' '}
-          <button
-            type="button"
-            className="text-blue-600 hover:text-blue-500 font-medium transition-colors duration-300"
-            onClick={() => {
-              if (onSwitchToLogin) {
-                onSwitchToLogin();
-              }
-            }}
-          >
-            <span className="flex items-center justify-center">
-              <span className="underline">立即登录</span>
-              <svg className="w-4 h-4 ml-1 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </span>
-          </button>
-        </p>
+      <div className="mt-8 border-t border-gray-200 pt-8 text-center">
+        <span className="text-sm text-gray-600">已有账户？</span>{' '}
+        <Button type="link" onClick={onSwitchToLogin} className="px-0">
+          立即登录
+        </Button>
       </div>
     </div>
   );
