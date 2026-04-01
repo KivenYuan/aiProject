@@ -3,6 +3,8 @@
  */
 
 import React, { useState } from 'react';
+import { Select } from 'antd';
+import { ArrowRightOutlined } from '@ant-design/icons';
 import type { GitHubEvent } from '../types/github.types';
 import { formatDate, getEventTypeChinese, getEventIcon } from '../utils/github.utils';
 
@@ -17,18 +19,14 @@ interface PushCommitSummary {
 const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
   const [eventType, setEventType] = useState<string>('all');
 
-  // 事件类型选项
   const eventTypes = ['all', ...Array.from(new Set(activities.map(event => event.type)))];
 
-  // 过滤活动
   const filteredActivities = eventType === 'all'
-    ? activities.slice(0, 8) // 最多显示8个
+    ? activities.slice(0, 8)
     : activities.filter(event => event.type === eventType).slice(0, 8);
 
-  // 获取事件描述
   const getEventDescription = (event: GitHubEvent): string => {
     const { type, payload } = event;
-    
     switch (type) {
       case 'PushEvent':
         return `推送了 ${payload.size || 0} 个提交到 ${event.repo.name}`;
@@ -59,10 +57,8 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
     }
   };
 
-  // 获取事件链接
   const getEventLink = (event: GitHubEvent): string => {
     const { type, payload } = event;
-    
     switch (type) {
       case 'PushEvent':
         return `https://github.com/${event.repo.name}/commits/${payload.ref || 'main'}`;
@@ -78,16 +74,11 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
       case 'PullRequestReviewEvent':
       case 'PullRequestReviewCommentEvent':
         return payload.pull_request?.html_url || `https://github.com/${event.repo.name}`;
-      case 'WatchEvent':
-      case 'ReleaseEvent':
-      case 'PublicEvent':
-        return `https://github.com/${event.repo.name}`;
       default:
         return `https://github.com/${event.repo.name}`;
     }
   };
 
-  // 获取事件颜色
   const getEventColor = (type: string): string => {
     const colorMap: Record<string, string> = {
       'PushEvent': 'bg-blue-100 text-blue-800',
@@ -103,35 +94,30 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
       'ReleaseEvent': 'bg-cyan-100 text-cyan-800',
       'PublicEvent': 'bg-gray-100 text-gray-800',
     };
-    
     return colorMap[type] || 'bg-gray-100 text-gray-800';
   };
 
   return (
     <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-card backdrop-blur-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900/85">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">活动动态</h3>
-          <p className="text-sm text-gray-600 mt-1">最近的GitHub活动记录</p>
+          <h3 className="text-lg font-bold text-gray-900 sm:text-xl">活动动态</h3>
+          <p className="mt-1 text-xs text-gray-600 sm:text-sm">最近的GitHub活动记录</p>
         </div>
-        
-        {/* 事件类型筛选 */}
-        <select
+
+        <Select
           value={eventType}
-          onChange={(e) => setEventType(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
-        >
-          <option value="all">所有活动</option>
-          {eventTypes.filter(type => type !== 'all').map(type => (
-            <option key={type} value={type}>
-              {getEventTypeChinese(type)}
-            </option>
-          ))}
-        </select>
+          onChange={setEventType}
+          size="small"
+          className="w-28 sm:w-32"
+          options={eventTypes.map(type => ({
+            value: type,
+            label: type === 'all' ? '所有活动' : getEventTypeChinese(type),
+          }))}
+        />
       </div>
 
-      {/* 活动列表 */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {filteredActivities.length > 0 ? (
           filteredActivities.map((activity) => {
             const eventDescription = getEventDescription(activity);
@@ -141,90 +127,70 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
             const eventIcon = getEventIcon(activity.type);
 
             return (
-              <div 
-                key={activity.id} 
-                className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+              <div
+                key={activity.id}
+                className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-gray-50 sm:p-3"
               >
-                {/* 事件图标 */}
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${eventColor}`}>
-                  <span className="text-lg">{eventIcon}</span>
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${eventColor}`}>
+                  <span className="text-base sm:text-lg">{eventIcon}</span>
                 </div>
 
-                {/* 事件内容 */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-gray-900">
                         <a
                           href={`https://github.com/${activity.actor.login}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="hover:text-blue-600 transition-colors"
+                          className="transition-colors hover:text-blue-600"
                         >
                           {activity.actor.login}
                         </a>
                       </p>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="mt-0.5 text-xs text-gray-600 sm:mt-1 sm:text-sm">
                         {eventDescription}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-500 sm:ml-2 sm:whitespace-nowrap">
+                    <span className="shrink-0 text-xs text-gray-500">
                       {eventTime}
                     </span>
                   </div>
 
-                  {/* 仓库信息和链接 */}
-                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 sm:mt-2">
                     <div className="flex items-center text-xs text-gray-500">
-                      <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                      </svg>
-                      <span className="truncate max-w-[150px]">{activity.repo.name}</span>
+                      <span className="max-w-[120px] truncate sm:max-w-[180px]">{activity.repo.name}</span>
                     </div>
-
                     <a
                       href={eventLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:text-blue-500 font-medium flex items-center"
+                      className="flex items-center text-xs font-medium text-blue-600 hover:text-blue-500"
                     >
                       查看详情
-                      <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                     </a>
                   </div>
 
-                  {/* 额外信息 */}
-                  {activity.payload && (
-                    <div className="mt-2">
-                      {activity.type === 'PushEvent' && activity.payload.commits && (
-                        <div className="bg-gray-50 rounded p-2 text-xs">
-                          <div className="font-medium text-gray-700 mb-1">提交信息：</div>
-                          {(activity.payload.commits as PushCommitSummary[]).slice(0, 2).map((commit, idx: number) => (
-                            <div key={idx} className="truncate text-gray-600">
-                              • {commit.message.split('\n')[0]}
-                            </div>
-                          ))}
-                          {activity.payload.commits.length > 2 && (
-                            <div className="text-gray-500 mt-1">
-                              还有 {activity.payload.commits.length - 2} 个提交...
-                            </div>
-                          )}
-                        </div>
+                  {activity.payload && activity.type === 'PushEvent' && activity.payload.commits && (
+                    <div className="mt-2 rounded bg-gray-50 p-2 text-xs">
+                      <div className="mb-1 font-medium text-gray-700">提交信息：</div>
+                      {(activity.payload.commits as PushCommitSummary[]).slice(0, 2).map((commit, idx: number) => (
+                        <div key={idx} className="truncate text-gray-600">• {commit.message.split('\n')[0]}</div>
+                      ))}
+                      {activity.payload.commits.length > 2 && (
+                        <div className="mt-1 text-gray-500">还有 {activity.payload.commits.length - 2} 个提交...</div>
                       )}
+                    </div>
+                  )}
 
-                      {activity.type === 'IssuesEvent' && activity.payload.issue && (
-                        <div className="bg-gray-50 rounded p-2 text-xs">
-                          <div className="font-medium text-gray-700 mb-1">
-                            {activity.payload.issue.title}
-                          </div>
-                          {activity.payload.issue.body && (
-                            <div className="text-gray-600 line-clamp-2">
-                              {activity.payload.issue.body}
-                            </div>
-                          )}
-                        </div>
+                  {activity.payload && activity.type === 'IssuesEvent' && activity.payload.issue && (
+                    <div className="mt-2 rounded bg-gray-50 p-2 text-xs">
+                      <div className="mb-1 font-medium text-gray-700">{activity.payload.issue.title}</div>
+                      {activity.payload.issue.body && (
+                        <div className="line-clamp-2 text-gray-600">{activity.payload.issue.body}</div>
                       )}
                     </div>
                   )}
@@ -233,22 +199,16 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
             );
           })
         ) : (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
+          <div className="py-8 text-center">
             <p className="text-gray-500">没有找到活动记录</p>
             {eventType !== 'all' && (
-              <p className="text-sm text-gray-400 mt-1">尝试选择"所有活动"查看全部</p>
+              <p className="mt-1 text-sm text-gray-400">尝试选择"所有活动"查看全部</p>
             )}
           </div>
         )}
       </div>
 
-      {/* 底部统计 */}
-      <div className="mt-6 border-t border-gray-200 pt-6">
+      <div className="mt-4 border-t border-gray-200 pt-4 sm:mt-6 sm:pt-6">
         <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
           <div>
             显示 <span className="font-semibold text-gray-900">{filteredActivities.length}</span> 个活动
@@ -259,12 +219,9 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
               href={`https://github.com/${activities[0]?.actor?.login || 'user'}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-500 font-medium flex items-center"
+              className="flex items-center font-medium text-blue-600 hover:text-blue-500"
             >
-              查看所有活动
-              <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              查看所有活动 <ArrowRightOutlined className="ml-1" />
             </a>
           )}
         </div>

@@ -3,6 +3,8 @@
  */
 
 import React, { useState } from 'react';
+import { Select, Tag } from 'antd';
+import { ArrowRightOutlined } from '@ant-design/icons';
 import type { GitHubRepo } from '../types/github.types';
 import { formatDate, getRepoPrimaryLanguage, calculateRepoActivityScore, getLanguageColor } from '../utils/github.utils';
 
@@ -14,10 +16,8 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
   const [sortBy, setSortBy] = useState<'updated' | 'stars' | 'forks'>('updated');
   const [filterLanguage, setFilterLanguage] = useState<string>('all');
 
-  // 获取所有语言选项
   const languages = ['all', ...Array.from(new Set(repos.map(repo => repo.language || 'Unknown').filter(Boolean)))];
 
-  // 排序和过滤
   const filteredRepos = repos
     .filter(repo => filterLanguage === 'all' || repo.language === filterLanguage)
     .sort((a, b) => {
@@ -31,9 +31,8 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
           return new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime();
       }
     })
-    .slice(0, 10); // 只显示前10个
+    .slice(0, 10);
 
-  // 获取活跃度标签
   const getActivityLabel = (score: number): string => {
     switch (score) {
       case 5: return '非常活跃';
@@ -45,148 +44,108 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
     }
   };
 
-  // 获取活跃度颜色
   const getActivityColor = (score: number): string => {
     switch (score) {
-      case 5: return 'bg-green-100 text-green-800';
-      case 4: return 'bg-blue-100 text-blue-800';
-      case 3: return 'bg-yellow-100 text-yellow-800';
-      case 2: return 'bg-orange-100 text-orange-800';
-      case 1: return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 5: return 'green';
+      case 4: return 'blue';
+      case 3: return 'gold';
+      case 2: return 'orange';
+      case 1: return 'red';
+      default: return 'default';
     }
   };
 
   return (
     <div className="dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-card backdrop-blur-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900/85">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">仓库列表</h3>
-          <p className="text-sm text-gray-600 mt-1">显示你的GitHub仓库，按活跃度排序</p>
+          <h3 className="text-lg font-bold text-gray-900 sm:text-xl">仓库列表</h3>
+          <p className="mt-1 text-xs text-gray-600 sm:text-sm">显示你的GitHub仓库，按活跃度排序</p>
         </div>
-        
-        <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2">
-          {/* 排序选择 */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'updated' | 'stars' | 'forks')}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
-          >
-            <option value="updated">最近更新</option>
-            <option value="stars">最多星标</option>
-            <option value="forks">最多复刻</option>
-          </select>
 
-          {/* 语言过滤 */}
-          <select
+        <div className="flex gap-2">
+          <Select
+            value={sortBy}
+            onChange={setSortBy}
+            size="small"
+            className="w-24 sm:w-28"
+            options={[
+              { value: 'updated', label: '最近更新' },
+              { value: 'stars', label: '最多星标' },
+              { value: 'forks', label: '最多复刻' },
+            ]}
+          />
+          <Select
             value={filterLanguage}
-            onChange={(e) => setFilterLanguage(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
-          >
-            {languages.map(lang => (
-              <option key={lang} value={lang}>
-                {lang === 'all' ? '所有语言' : lang}
-              </option>
-            ))}
-          </select>
+            onChange={setFilterLanguage}
+            size="small"
+            className="w-24 sm:w-28"
+            options={languages.map(lang => ({
+              value: lang,
+              label: lang === 'all' ? '所有语言' : lang,
+            }))}
+          />
         </div>
       </div>
 
-      {/* 仓库列表 */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {filteredRepos.map(repo => {
           const activityScore = calculateRepoActivityScore(repo);
           const activityLabel = getActivityLabel(activityScore);
-          const activityColor = getActivityColor(activityScore);
+          const activityTagColor = getActivityColor(activityScore);
           const language = getRepoPrimaryLanguage(repo);
           const languageColor = getLanguageColor(language);
 
           return (
             <div
               key={repo.id}
-              className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-300"
+              className="rounded-xl border border-gray-200 p-3 transition-all duration-300 hover:border-blue-300 hover:shadow-sm sm:p-4"
             >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2 sm:mb-2">
                     <a
                       href={repo.html_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+                      className="truncate text-base font-semibold text-gray-900 transition-colors hover:text-blue-600 sm:text-lg"
                     >
                       {repo.name}
                     </a>
-                    {repo.private && (
-                      <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">
-                        私有
-                      </span>
-                    )}
+                    {repo.private && <Tag>私有</Tag>}
                   </div>
 
                   {repo.description && (
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{repo.description}</p>
+                    <p className="mb-2 line-clamp-2 text-xs text-gray-600 sm:mb-3 sm:text-sm">{repo.description}</p>
                   )}
 
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                    {/* 语言 */}
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 sm:gap-3 sm:text-sm">
                     {repo.language && (
                       <div className="flex items-center">
-                        <div
-                          className="w-3 h-3 rounded-full mr-1"
-                          style={{ backgroundColor: languageColor }}
-                        />
+                        <div className="mr-1 h-2.5 w-2.5 shrink-0 rounded-full sm:h-3 sm:w-3" style={{ backgroundColor: languageColor }} />
                         <span>{repo.language}</span>
                       </div>
                     )}
-
-                    {/* 星标 */}
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span>{repo.stargazers_count}</span>
-                    </div>
-
-                    {/* 复刻 */}
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                      </svg>
-                      <span>{repo.forks_count}</span>
-                    </div>
-
-                    {/* 最后更新 */}
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>更新于 {formatDate(repo.pushed_at, 'relative')}</span>
-                    </div>
+                    <span>★ {repo.stargazers_count}</span>
+                    <span>⑂ {repo.forks_count}</span>
+                    <span className="hidden sm:inline">更新于 {formatDate(repo.pushed_at, 'relative')}</span>
                   </div>
                 </div>
 
-                {/* 活跃度标签 */}
-                <div className={`inline-flex w-fit px-3 py-1 text-xs font-medium rounded-full ${activityColor}`}>
+                <Tag color={activityTagColor} className="shrink-0 self-start">
                   {activityLabel}
-                </div>
+                </Tag>
               </div>
 
-              {/* 主题标签 */}
               {repo.topics && repo.topics.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2">
                   {repo.topics.slice(0, 5).map(topic => (
-                    <span
-                      key={topic}
-                      className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-lg"
-                    >
+                    <Tag key={topic} color="blue" className="text-xs">
                       {topic}
-                    </span>
+                    </Tag>
                   ))}
                   {repo.topics.length > 5 && (
-                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-lg">
-                      +{repo.topics.length - 5}
-                    </span>
+                    <Tag className="text-xs">+{repo.topics.length - 5}</Tag>
                   )}
                 </div>
               )}
@@ -195,23 +154,18 @@ const RepoList: React.FC<RepoListProps> = ({ repos }) => {
         })}
       </div>
 
-      {/* 底部统计 */}
-      <div className="mt-6 border-t border-gray-200 pt-6">
+      <div className="mt-4 border-t border-gray-200 pt-4 sm:mt-6 sm:pt-6">
         <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            显示 <span className="font-semibold text-gray-900">{filteredRepos.length}</span> 个仓库中的 
-            <span className="font-semibold text-gray-900 ml-1">{repos.length}</span> 个
+            显示 <span className="font-semibold text-gray-900">{filteredRepos.length}</span> / <span className="font-semibold text-gray-900">{repos.length}</span> 个仓库
           </div>
           <a
             href={`https://github.com/${repos[0]?.owner?.login || 'user'}?tab=repositories`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-500 font-medium flex items-center"
+            className="flex items-center font-medium text-blue-600 hover:text-blue-500"
           >
-            查看所有仓库
-            <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
+            查看所有仓库 <ArrowRightOutlined className="ml-1" />
           </a>
         </div>
       </div>
