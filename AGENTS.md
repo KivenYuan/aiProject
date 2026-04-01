@@ -27,6 +27,10 @@ See `frontend/package.json` and `backend/package.json` for all scripts. Key comm
 - **Build**: `cd frontend && npm run build` (runs `tsc -b && vite build`)
 - **Type check**: `cd frontend && npx tsc --noEmit`
 
+### UI Framework
+
+The frontend uses **antd v6** (Ant Design) with `@ant-design/icons` for UI components. The app wraps content in `ConfigProvider` (in `App.tsx`) for dark/light theme support. Components used: `Button`, `Input`, `Input.Password`, `Select`, `Segmented`, `Tag`, `Alert`, `Progress`, `Checkbox`.
+
 ### Gotchas
 
 - The backend uses `nodemon` for dev mode and stores data in-memory. Restarting the backend process resets all users (the demo user is re-seeded on startup).
