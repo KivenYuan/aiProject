@@ -237,6 +237,8 @@ export interface GitHubContextType {
   user: GitHubUser | null;
   stats: GitHubStats | null;
   isLoading: boolean;
+  /** 仪表盘聚合接口 / 统计数据加载中（可与 isLoading 独立，用于骨架屏） */
+  isStatsLoading: boolean;
   error: string | null;
   login: (code: string) => Promise<void>;
   loginDev: () => Promise<void>; // 开发模式登录

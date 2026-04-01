@@ -16,6 +16,19 @@ interface PushCommitSummary {
   message: string;
 }
 
+/** PushEvent：GitHub 自 2025-10 起可能在 Events API 中省略 size/commits，需降级文案 */
+function getPushDescription(repoName: string, payload: Record<string, unknown>): string {
+  const commits = Array.isArray(payload.commits) ? payload.commits : [];
+  const n =
+    (typeof payload.size === 'number' && payload.size > 0 ? payload.size : 0) ||
+    (typeof payload.distinct_size === 'number' && payload.distinct_size > 0 ? payload.distinct_size : 0) ||
+    commits.length;
+  if (n > 0) {
+    return `推送了 ${n} 个提交到 ${repoName}`;
+  }
+  return `推送了代码到 ${repoName}`;
+}
+
 const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
   const [eventType, setEventType] = useState<string>('all');
 
@@ -29,7 +42,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
     const { type, payload } = event;
     switch (type) {
       case 'PushEvent':
-        return `推送了 ${payload.size || 0} 个提交到 ${event.repo.name}`;
+        return getPushDescription(event.repo.name, payload as Record<string, unknown>);
       case 'CreateEvent':
         return `创建了 ${payload.ref_type} "${payload.ref || '资源'}" 在 ${event.repo.name}`;
       case 'DeleteEvent':
@@ -174,7 +187,10 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
                     </a>
                   </div>
 
-                  {activity.payload && activity.type === 'PushEvent' && activity.payload.commits && (
+                  {activity.payload &&
+                    activity.type === 'PushEvent' &&
+                    Array.isArray(activity.payload.commits) &&
+                    activity.payload.commits.length > 0 && (
                     <div className="mt-2 rounded bg-gray-50 p-2 text-xs">
                       <div className="mb-1 font-medium text-gray-700">提交信息：</div>
                       {(activity.payload.commits as PushCommitSummary[]).slice(0, 2).map((commit, idx: number) => (

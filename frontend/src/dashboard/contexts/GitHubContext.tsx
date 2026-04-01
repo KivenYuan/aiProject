@@ -46,6 +46,7 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
   const [user, setUser] = useState<GitHubUser | null>(null);
   const [stats, setStats] = useState<GitHubStats | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isStatsLoading, setIsStatsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   // 初始化：从本地存储加载token
@@ -93,12 +94,13 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
     }
   };
 
-  // 加载统计信息
+  // 加载统计信息（聚合接口较慢，单独跟踪 isStatsLoading 供骨架屏使用）
   const loadStats = async (userToken: string) => {
+    setIsStatsLoading(true);
+    setStats(null);
     try {
       const service = createGitHubServiceAuto(userToken);
-      
-      // 检查是否有getDashboardStats方法
+
       if ('getDashboardStats' in service && typeof service.getDashboardStats === 'function') {
         const statsData = await service.getDashboardStats();
         setStats(statsData);
@@ -107,7 +109,8 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
       }
     } catch (err: any) {
       console.error('加载统计信息失败:', err);
-      // 不设置错误，因为主用户数据已加载
+    } finally {
+      setIsStatsLoading(false);
     }
   };
 
@@ -190,6 +193,7 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
     setToken(null);
     setUser(null);
     setStats(null);
+    setIsStatsLoading(false);
     clearTokenFromStorage();
   };
 
@@ -256,6 +260,7 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
     user,
     stats,
     isLoading,
+    isStatsLoading,
     error,
     login,
     loginDev,

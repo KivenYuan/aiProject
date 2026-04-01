@@ -3,13 +3,14 @@
  */
 
 import React from 'react';
-import { Button, Tag } from 'antd';
+import { Button } from 'antd';
 import { GithubOutlined, ExperimentOutlined, ExportOutlined, DisconnectOutlined } from '@ant-design/icons';
 import { useGitHub } from '../contexts/GitHubContext';
 import GitHubStatsCard from './GitHubStatsCard';
 import RepoList from './RepoList';
 import CommitTimeline from './CommitTimeline';
 import ActivityFeed from './ActivityFeed';
+import DashboardSkeleton from './DashboardSkeleton';
 import { generateOAuthUrl, isGitHubOAuthConfigured } from '../utils/github.utils';
 
 const shell = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
@@ -20,7 +21,7 @@ const OAUTH_SETUP_HINT =
   '请复制 frontend/.env.example 为 frontend/.env.local，将 VITE_GITHUB_CLIENT_ID 设为你在 GitHub → Settings → Developer settings → OAuth Apps 中创建的 Client ID，保存后重启 npm run dev。';
 
 const DashboardPage: React.FC = () => {
-  const { token, user, stats, isLoading, error, logout, loginDev } = useGitHub();
+  const { token, user, stats, isLoading, isStatsLoading, error, logout, loginDev } = useGitHub();
   const oauthReady = isGitHubOAuthConfigured();
 
   if (!token) {
@@ -167,25 +168,31 @@ const DashboardPage: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-2 sm:mt-6">
-          <Tag color="default" className="text-xs">
-            数据概览 · 最近更新 {stats ? new Date().toLocaleDateString('zh-CN') : '—'}
-          </Tag>
-        </div>
+        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
+          {isStatsLoading
+            ? '正在同步仪表盘数据（仓库、提交与活动）…'
+            : `数据概览 · 最近更新 ${stats ? new Date().toLocaleDateString('zh-CN') : '—'}`}
+        </p>
       </section>
 
-      <div className="py-8 lg:py-12">
-        {stats && <GitHubStatsCard stats={stats} />}
+      <div className="py-10 lg:py-12">
+        {isStatsLoading ? (
+          <DashboardSkeleton />
+        ) : (
+          <>
+            {stats && <GitHubStatsCard stats={stats} />}
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-          <div>
-            <RepoList repos={stats?.repos || []} />
-          </div>
-          <div className="space-y-6 sm:space-y-8">
-            <CommitTimeline commits={stats?.recentCommits || []} />
-            <ActivityFeed activities={stats?.recentActivity || []} />
-          </div>
-        </div>
+            <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div>
+                <RepoList repos={stats?.repos || []} />
+              </div>
+              <div className="space-y-8">
+                <CommitTimeline commits={stats?.recentCommits || []} />
+                <ActivityFeed activities={stats?.recentActivity || []} />
+              </div>
+            </div>
+          </>
+        )}
 
         <p className="mt-12 border-t border-slate-200/80 pt-8 text-center text-xs text-slate-500">
           数据来自 GitHub API，经后端代理；仅用于作品展示与能力说明。
