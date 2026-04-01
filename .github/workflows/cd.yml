@@ -1,4 +1,4 @@
-name: CD Huawei ECS
+name: CD — SSH deploy
 
 on:
   workflow_run:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy to Huawei ECS
+    name: Deploy via SSH
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master')
@@ -34,10 +34,10 @@ jobs:
           NODE_MAJOR: ${{ secrets.NODE_MAJOR }}
           BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
         with:
-          host: ${{ secrets.HUAWEI_HOST }}
-          username: ${{ secrets.HUAWEI_USER }}
-          key: ${{ secrets.HUAWEI_SSH_KEY }}
-          port: ${{ secrets.HUAWEI_SSH_PORT }}
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
           envs: DEPLOY_DOMAIN,REPO_SSH,PROJECT_DIR,GIT_BRANCH,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,JWT_SECRET,SESSION_SECRET,ENABLE_HTTPS,EMAIL_FOR_LETSENCRYPT,NODE_MAJOR,BACKEND_PORT
           script_stop: true
           command_timeout: 60m
@@ -46,7 +46,7 @@ jobs:
 
             PROJECT_DIR="${PROJECT_DIR:-/var/www/ai-project}"
             DEPLOY_DOMAIN="${DEPLOY_DOMAIN:-example.com}"
-            REPO_SSH="${REPO_SSH:-git@github.com:KivenYuan/aiProject.git}"
+            REPO_SSH="${REPO_SSH:-}"
             GIT_BRANCH="${GIT_BRANCH:-master}"
             ENABLE_HTTPS="${ENABLE_HTTPS:-true}"
             NODE_MAJOR="${NODE_MAJOR:-20}"
@@ -56,6 +56,10 @@ jobs:
             cd "$PROJECT_DIR"
 
             if [ ! -d .git ]; then
+              if [ -z "$REPO_SSH" ]; then
+                echo "首次部署需要配置 Secret：REPO_SSH（仓库 SSH 地址）" >&2
+                exit 1
+              fi
               git clone "$REPO_SSH" .
             fi
 
@@ -63,20 +67,4 @@ jobs:
             git checkout "$GIT_BRANCH"
             git pull origin "$GIT_BRANCH"
 
-            cat > deploy-huawei.local.sh <<EOF
-            DOMAIN="${DEPLOY_DOMAIN}"
-            REPO_SSH="${REPO_SSH}"
-            PROJECT_DIR="${PROJECT_DIR}"
-            GITHUB_CLIENT_ID="${GITHUB_CLIENT_ID}"
-            GITHUB_CLIENT_SECRET="${GITHUB_CLIENT_SECRET}"
-            JWT_SECRET="${JWT_SECRET}"
-            SESSION_SECRET="${SESSION_SECRET}"
-            ENABLE_HTTPS="${ENABLE_HTTPS}"
-            EMAIL_FOR_LETSENCRYPT="${EMAIL_FOR_LETSENCRYPT}"
-            NODE_MAJOR="${NODE_MAJOR}"
-            BACKEND_PORT="${BACKEND_PORT}"
-            GIT_BRANCH="${GIT_BRANCH}"
-            EOF
-            chmod 600 deploy-huawei.local.sh
-
-            bash deploy-huawei.sh
+            bash deploy-remote.sh
