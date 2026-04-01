@@ -121,4 +121,4 @@ jobs:
             git checkout "$GIT_BRANCH"
             git pull origin "$GIT_BRANCH"
 
-            bash deploy-remote.sh
+            bash ./deploy/deploy-remote.sh
