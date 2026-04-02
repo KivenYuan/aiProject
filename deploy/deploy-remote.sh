@@ -124,7 +124,6 @@ if [[ ! -d "$PROJECT_DIR/frontend" ]]; then
 fi
 
 write_frontend_env() {
-  umask 077
   local vite_api vite_redirect
   if [[ "$SKIP_BACKEND" == "true" ]]; then
     vite_api="http://127.0.0.1:${BACKEND_PORT}/api"
@@ -133,29 +132,34 @@ write_frontend_env() {
     vite_api="${BASE_URL}/api"
     vite_redirect="${BASE_URL}/auth/github/callback"
   fi
-  {
-    printf 'VITE_API_BASE=%q\n' "$vite_api"
-    printf 'VITE_GITHUB_CLIENT_ID=%q\n' "$GITHUB_CLIENT_ID"
-    printf 'VITE_GITHUB_REDIRECT_URI=%q\n' "$vite_redirect"
-  } >"$PROJECT_DIR/frontend/.env.production"
+  (
+    umask 077
+    {
+      printf 'VITE_API_BASE=%q\n' "$vite_api"
+      printf 'VITE_GITHUB_CLIENT_ID=%q\n' "$GITHUB_CLIENT_ID"
+      printf 'VITE_GITHUB_REDIRECT_URI=%q\n' "$vite_redirect"
+    } >"$PROJECT_DIR/frontend/.env.production"
+  )
 }
 
 write_backend_env() {
-  umask 077
   local node_env="production"
   [[ "$SKIP_BACKEND" == "true" ]] && node_env="development"
-  {
-    printf 'PORT=%q\n' "$BACKEND_PORT"
-    printf 'NODE_ENV=%q\n' "$node_env"
-    printf 'FRONTEND_URL=%q\n' "$BASE_URL"
-    printf 'GITHUB_CLIENT_ID=%q\n' "$GITHUB_CLIENT_ID"
-    printf 'GITHUB_CLIENT_SECRET=%q\n' "$GITHUB_CLIENT_SECRET"
-    printf 'GITHUB_REDIRECT_URI=%q\n' "${BASE_URL}/auth/github/callback"
-    printf 'JWT_SECRET=%q\n' "$JWT_SECRET"
-    printf 'JWT_EXPIRES_IN=%q\n' "7d"
-    printf 'SESSION_SECRET=%q\n' "$SESSION_SECRET"
-    printf 'DATABASE_PATH=%q\n' "./database.sqlite"
-  } >"$PROJECT_DIR/backend/.env"
+  (
+    umask 077
+    {
+      printf 'PORT=%q\n' "$BACKEND_PORT"
+      printf 'NODE_ENV=%q\n' "$node_env"
+      printf 'FRONTEND_URL=%q\n' "$BASE_URL"
+      printf 'GITHUB_CLIENT_ID=%q\n' "$GITHUB_CLIENT_ID"
+      printf 'GITHUB_CLIENT_SECRET=%q\n' "$GITHUB_CLIENT_SECRET"
+      printf 'GITHUB_REDIRECT_URI=%q\n' "${BASE_URL}/auth/github/callback"
+      printf 'JWT_SECRET=%q\n' "$JWT_SECRET"
+      printf 'JWT_EXPIRES_IN=%q\n' "7d"
+      printf 'SESSION_SECRET=%q\n' "$SESSION_SECRET"
+      printf 'DATABASE_PATH=%q\n' "./database.sqlite"
+    } >"$PROJECT_DIR/backend/.env"
+  )
   chmod 600 "$PROJECT_DIR/backend/.env"
 }
 
@@ -169,6 +173,9 @@ echo "[7/9] Build frontend + install backend deps..."
 cd "$PROJECT_DIR/frontend"
 npm ci
 npm run build
+
+# Ensure dist/ is readable by nginx (www-data)
+chmod -R o+rX "$PROJECT_DIR/frontend/dist"
 
 if [[ "$SKIP_BACKEND" != "true" ]]; then
   echo "[7b/9] Backend deps (sqlite3 native build)..."
