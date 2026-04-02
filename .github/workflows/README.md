@@ -15,7 +15,8 @@
 - `DEPLOY_SSH_USER`：SSH 用户（例如 `root` 或 `ubuntu`）
 - `DEPLOY_SSH_KEY`：SSH 私钥全文（多行）
 - `DEPLOY_SSH_PORT`：SSH 端口（通常 `22`）
-- `DEPLOY_DOMAIN`：线上站点域名（例如 `your-domain.com`）
+- `DEPLOY_DOMAIN`：线上站点域名（例如 `your-domain.com`），用于 Nginx/certificate 的主标识；可与 apex 对齐
+- `DEPLOY_PUBLIC_HOST`（选填）：浏览器实际访问的主机名。若站点是 `https://www.example.com/` 而 `DEPLOY_DOMAIN` 为 `example.com`，请填 `www.example.com`，否则 OAuth 回调会与地址栏不一致
 - `REPO_SSH`：仓库 SSH 地址（例如 `git@github.com:org/repo.git`），首次 `git clone` 必需
 - `PROJECT_DIR`：服务器上的部署目录（例如 `/var/www/ai-project`）
 - `GITHUB_CLIENT_ID`

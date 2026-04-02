@@ -16,6 +16,9 @@ fi
 
 # 与 GitHub CD 中 Secret 名称对齐（支持 CLIENT_ID / CLIENT_SECRET 别名）
 DOMAIN="${DOMAIN:-${DEPLOY_DOMAIN:-}}"
+# 浏览器里实际访问的主机名（例如站点是 https://www.example.com/ 而 DEPLOY_DOMAIN 只写 example.com 时，设为 www.example.com）。
+# 不设置时与 DOMAIN 一致（去掉端口）。OAuth 回调、VITE_API_BASE、FRONTEND_URL 均用 BASE_HOST。
+PUBLIC_HOST="${PUBLIC_HOST:-${DEPLOY_PUBLIC_HOST:-${SITE_HOST:-}}}"
 GITHUB_CLIENT_ID="${GITHUB_CLIENT_ID:-${CLIENT_ID:-}}"
 GITHUB_CLIENT_SECRET="${GITHUB_CLIENT_SECRET:-${CLIENT_SECRET:-}}"
 PROJECT_DIR="${PROJECT_DIR:-}"
@@ -50,13 +53,25 @@ if [[ "$PROJECT_DIR" != /* ]]; then
   die "PROJECT_DIR 必须是服务器上的绝对路径，例如 /var/www/ai-project（不要把 git URL 填在这里，仓库地址用 REPO_SSH）"
 fi
 
+DOMAIN_HOST="${DOMAIN%%:*}"
+if [[ -n "$PUBLIC_HOST" ]]; then
+  BASE_HOST="${PUBLIC_HOST%%:*}"
+else
+  BASE_HOST="$DOMAIN_HOST"
+fi
+
 # localhost / 仅本机：不装后端依赖（跳过 sqlite3 编译）、不启 PM2、不申请 Let's Encrypt
 SKIP_BACKEND=false
 if [[ "$DOMAIN" == localhost* ]] || [[ "$DOMAIN" == 127.0.0.1* ]]; then
   SKIP_BACKEND=true
 fi
 
-NGINX_SERVER_NAME="${DOMAIN%%:*}"
+# Nginx / certbot：保留 DOMAIN 对应的主机名；若 PUBLIC_HOST 不同则同时监听（如 apex + www）
+if [[ "$BASE_HOST" != "$DOMAIN_HOST" ]]; then
+  NGINX_SERVER_NAME="${DOMAIN_HOST} ${BASE_HOST}"
+else
+  NGINX_SERVER_NAME="${DOMAIN_HOST}"
+fi
 
 if [[ "$SKIP_BACKEND" == "true" ]]; then
   echo "[INFO] DOMAIN 为 localhost/127.0.0.1：跳过后端 npm 安装与 PM2；HTTPS 将跳过。"
@@ -67,12 +82,12 @@ fi
 
 if [[ "$SKIP_BACKEND" != "true" ]]; then
   if [[ "$ENABLE_HTTPS_EFFECTIVE" == "true" || "$ENABLE_HTTPS_EFFECTIVE" == "1" ]]; then
-    BASE_URL="https://${DOMAIN}"
+    BASE_URL="https://${BASE_HOST}"
   else
-    BASE_URL="http://${DOMAIN}"
+    BASE_URL="http://${BASE_HOST}"
   fi
 else
-  BASE_URL="http://${DOMAIN}"
+  BASE_URL="http://${BASE_HOST}"
 fi
 
 USE_CUSTOM_SSL=false
@@ -127,7 +142,7 @@ write_frontend_env() {
   local vite_api vite_redirect
   if [[ "$SKIP_BACKEND" == "true" ]]; then
     vite_api="http://127.0.0.1:${BACKEND_PORT}/api"
-    vite_redirect="http://${DOMAIN}/auth/github/callback"
+    vite_redirect="http://${BASE_HOST}/auth/github/callback"
   else
     vite_api="${BASE_URL}/api"
     vite_redirect="${BASE_URL}/auth/github/callback"
@@ -268,10 +283,16 @@ if [[ "$ENABLE_HTTPS_EFFECTIVE" == "true" || "$ENABLE_HTTPS_EFFECTIVE" == "1" ]]
   else
     echo "[extra] Configure HTTPS with certbot..."
     sudo apt install -y certbot python3-certbot-nginx
-    if [[ -n "$EMAIL_FOR_LETSENCRYPT" ]]; then
-      sudo certbot --nginx -d "$NGINX_SERVER_NAME" -m "$EMAIL_FOR_LETSENCRYPT" --agree-tos --no-eff-email --non-interactive
+    certbot_domains=()
+    if [[ "$BASE_HOST" != "$DOMAIN_HOST" ]]; then
+      certbot_domains=(-d "$DOMAIN_HOST" -d "$BASE_HOST")
     else
-      sudo certbot --nginx -d "$NGINX_SERVER_NAME" --agree-tos --register-unsafely-without-email --non-interactive
+      certbot_domains=(-d "$DOMAIN_HOST")
+    fi
+    if [[ -n "$EMAIL_FOR_LETSENCRYPT" ]]; then
+      sudo certbot --nginx "${certbot_domains[@]}" -m "$EMAIL_FOR_LETSENCRYPT" --agree-tos --no-eff-email --non-interactive
+    else
+      sudo certbot --nginx "${certbot_domains[@]}" --agree-tos --register-unsafely-without-email --non-interactive
     fi
   fi
 else
@@ -287,6 +308,9 @@ if [[ "$SKIP_BACKEND" == "true" ]]; then
 else
   echo "Frontend: ${BASE_URL}"
   echo "Backend health: ${BASE_URL}/health"
+  if [[ "$BASE_HOST" != "$DOMAIN_HOST" ]]; then
+    echo "Nginx server_name: ${NGINX_SERVER_NAME}（OAuth 与 API 基址使用公网主机名 ${BASE_HOST}）"
+  fi
 fi
 echo
 echo "Important:"

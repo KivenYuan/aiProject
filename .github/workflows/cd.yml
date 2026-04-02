@@ -45,6 +45,7 @@ jobs:
           echo ""
           echo "=== env passed to remote script (same masking applies) ==="
           echo "DEPLOY_DOMAIN=${{ secrets.DEPLOY_DOMAIN }}"
+          echo "DEPLOY_PUBLIC_HOST=${{ secrets.DEPLOY_PUBLIC_HOST }}"
           echo "REPO_SSH=${{ secrets.REPO_SSH }}"
           echo "PROJECT_DIR=${{ secrets.PROJECT_DIR }}"
           echo "GIT_BRANCH=${{ secrets.GIT_BRANCH }}"
@@ -63,6 +64,7 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         env:
           DEPLOY_DOMAIN: ${{ secrets.DEPLOY_DOMAIN }}
+          DEPLOY_PUBLIC_HOST: ${{ secrets.DEPLOY_PUBLIC_HOST }}
           REPO_SSH: ${{ secrets.REPO_SSH }}
           PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
           GIT_BRANCH: ${{ secrets.GIT_BRANCH }}
@@ -81,7 +83,7 @@ jobs:
           username: ${{ secrets.DEPLOY_SSH_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_SSH_PORT }}
-          envs: DEPLOY_DOMAIN,REPO_SSH,PROJECT_DIR,GIT_BRANCH,CLIENT_ID,CLIENT_SECRET,JWT_SECRET,SESSION_SECRET,ENABLE_HTTPS,EMAIL_FOR_LETSENCRYPT,SSL_CERTIFICATE_PATH,SSL_PRIVATE_KEY_PATH,NODE_MAJOR,BACKEND_PORT
+          envs: DEPLOY_DOMAIN,DEPLOY_PUBLIC_HOST,REPO_SSH,PROJECT_DIR,GIT_BRANCH,CLIENT_ID,CLIENT_SECRET,JWT_SECRET,SESSION_SECRET,ENABLE_HTTPS,EMAIL_FOR_LETSENCRYPT,SSL_CERTIFICATE_PATH,SSL_PRIVATE_KEY_PATH,NODE_MAJOR,BACKEND_PORT
           script_stop: true
           command_timeout: 60m
           script: |
