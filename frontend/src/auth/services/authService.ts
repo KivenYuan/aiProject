@@ -13,16 +13,11 @@ type AppEnv = {
 
 // API基础URL（优先从运行时注入变量读取，避免在 Jest CJS 下直接解析 import.meta）
 const API_BASE = ((globalThis as AppEnv).__APP_ENV__?.VITE_API_BASE || 'http://localhost:3000/api');
-console.log('globalThis', globalThis);
-console.log('__APP_ENV__', (globalThis as AppEnv).__APP_ENV__);
-console.log('VITE_API_BASE', (globalThis as AppEnv).__APP_ENV__?.VITE_API_BASE);
 
 /**
  * 通用的API请求函数
  */
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  console.log('API_BASE', API_BASE);
-  
   const url = `${API_BASE}${endpoint}`;
   
   const defaultHeaders = {
