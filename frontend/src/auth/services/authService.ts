@@ -18,6 +18,8 @@ const API_BASE = ((globalThis as AppEnv).__APP_ENV__?.VITE_API_BASE || 'http://l
  * 通用的API请求函数
  */
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  console.log('API_BASE', API_BASE);
+  
   const url = `${API_BASE}${endpoint}`;
   
   const defaultHeaders = {
