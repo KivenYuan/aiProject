@@ -232,7 +232,7 @@ describe('auth.utils - 认证工具函数', () => {
       expect(mockUser).toHaveProperty('id');
       expect(mockUser.id).toMatch(/^user_/);
       expect(mockUser).toHaveProperty('email', 'demo@example.com');
-      expect(mockUser).toHaveProperty('name', '演示用户');
+      expect(mockUser).toHaveProperty('name', '访客用户');
       expect(mockUser).toHaveProperty('role', 'user');
       expect(mockUser).toHaveProperty('createdAt');
       expect(mockUser).toHaveProperty('updatedAt');

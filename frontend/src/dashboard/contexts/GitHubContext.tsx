@@ -163,7 +163,7 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
     }
   };
 
-  // 开发模式登录（使用模拟数据）
+  // 示例数据登录（本地模拟 GitHub 数据）
   const loginDev = async () => {
     setIsLoading(true);
     setError(null);
@@ -179,11 +179,10 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
       // 加载模拟用户数据
       await loadUserData(mockToken);
       
-      console.log('🎮 开发模式：使用模拟GitHub数据');
-      console.log('💡 提示：生产环境需要配置GitHub OAuth和真实后端API');
+      console.log('使用示例 GitHub 数据（未连接真实账户）');
     } catch (err: any) {
-      console.error('开发模式登录失败:', err);
-      setError('开发模式登录失败: ' + (err.message || '未知错误'));
+      console.error('示例数据登录失败:', err);
+      setError('示例数据加载失败：' + (err.message || '未知错误'));
       setIsLoading(false);
     }
   };
@@ -207,7 +206,7 @@ export function GitHubProvider({ children }: GitHubProviderProps) {
   const startOAuth = () => {
     if (!isGitHubOAuthConfigured()) {
       setError(
-        '未配置 GitHub OAuth：请在 frontend/.env.local 中设置 VITE_GITHUB_CLIENT_ID（见 .env.example），保存后重启前端 dev。'
+        '尚未配置 GitHub 登录：请在部署环境中设置 VITE_GITHUB_CLIENT_ID，并确保回调地址与 GitHub OAuth 应用一致。'
       );
       return;
     }

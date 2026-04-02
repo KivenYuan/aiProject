@@ -318,7 +318,7 @@ export function isGitHubOAuthConfigured(): boolean {
 export function generateOAuthUrl(): string {
   if (!isGitHubOAuthConfigured()) {
     throw new Error(
-      '未配置 VITE_GITHUB_CLIENT_ID：请复制 frontend/.env.example 为 frontend/.env.local，填写 GitHub OAuth App 的 Client ID 后重启 npm run dev。'
+      '未配置 VITE_GITHUB_CLIENT_ID：请在构建或运行环境中设置该变量为 GitHub OAuth 应用的 Client ID。'
     );
   }
 

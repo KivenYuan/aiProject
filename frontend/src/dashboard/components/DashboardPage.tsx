@@ -1,5 +1,5 @@
 /**
- * 开发者仪表盘主页面
+ * GitHub 数据仪表盘主页面
  */
 
 import React from 'react';
@@ -18,7 +18,7 @@ const card =
   'dashboard-panel rounded-2xl border border-slate-200/80 bg-white/90 shadow-card backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/85';
 
 const OAUTH_SETUP_HINT =
-  '请复制 frontend/.env.example 为 frontend/.env.local，将 VITE_GITHUB_CLIENT_ID 设为你在 GitHub → Settings → Developer settings → OAuth Apps 中创建的 Client ID，保存后重启 npm run dev。';
+  '当前站点尚未配置 GitHub 登录：请在部署环境中设置 GitHub OAuth 应用的 Client ID（对应环境变量 VITE_GITHUB_CLIENT_ID），并确保回调地址与 GitHub 应用设置一致。';
 
 const DashboardPage: React.FC = () => {
   const { token, user, stats, isLoading, isStatsLoading, error, logout, loginDev } = useGitHub();
@@ -28,12 +28,12 @@ const DashboardPage: React.FC = () => {
     return (
       <div className={`${shell} py-12 lg:py-16`}>
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Showcase</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">GitHub</p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
-            开发者数据仪表盘
+            数据仪表盘
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
-            连接 GitHub，展示仓库、提交与动态——适合作为面试作品中的「可交互 Demo」。
+            授权后在此查看仓库、近期提交与动态，数据与 GitHub 账户同步。
           </p>
         </div>
 
@@ -43,7 +43,7 @@ const DashboardPage: React.FC = () => {
           </div>
           <h2 className="mt-6 text-center text-lg font-semibold text-slate-900 sm:text-xl">连接 GitHub</h2>
           <p className="mt-2 text-center text-sm leading-relaxed text-slate-600">
-            通过后端代理交换 OAuth 令牌，前端不暴露 client secret。
+            使用 OAuth 2.0 授权，令牌由服务端安全处理。
           </p>
 
           <Button
@@ -70,16 +70,8 @@ const DashboardPage: React.FC = () => {
             className="mt-3"
             onClick={loginDev}
           >
-            开发模式（模拟数据）
+            使用示例数据浏览
           </Button>
-
-          <div className="mt-8 border-t border-slate-200 pt-6 text-left text-xs leading-relaxed text-slate-500">
-            <p className="font-medium text-slate-700">说明</p>
-            <ul className="mt-2 list-inside list-disc space-y-1">
-              <li>真实数据需配置后端 <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px]">/api</code> 与 GitHub OAuth</li>
-              <li>演示时可使用开发模式快速浏览 UI</li>
-            </ul>
-          </div>
         </div>
       </div>
     );
@@ -195,7 +187,7 @@ const DashboardPage: React.FC = () => {
         )}
 
         <p className="mt-12 border-t border-slate-200/80 pt-8 text-center text-xs text-slate-500">
-          数据来自 GitHub API，经后端代理；仅用于作品展示与能力说明。
+          数据来自 GitHub，通过服务端代理拉取。
         </p>
       </div>
     </div>

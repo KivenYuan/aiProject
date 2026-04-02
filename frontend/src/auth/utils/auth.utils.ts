@@ -82,13 +82,13 @@ export const validatePassword = (password: string): { valid: boolean; message?: 
   return { valid: true };
 };
 
-// 生成模拟用户数据（开发用）
+// 生成本地模拟用户数据（离线或测试场景）
 export const generateMockUser = (): User => {
   const timestamp = new Date().toISOString();
   return {
     id: 'user_' + Math.random().toString(36).substr(2, 9),
     email: 'demo@example.com',
-    name: '演示用户',
+    name: '访客用户',
     role: 'user',
     createdAt: timestamp,
     updatedAt: timestamp,

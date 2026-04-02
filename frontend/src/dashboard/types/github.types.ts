@@ -241,7 +241,7 @@ export interface GitHubContextType {
   isStatsLoading: boolean;
   error: string | null;
   login: (code: string) => Promise<void>;
-  loginDev: () => Promise<void>; // 开发模式登录
+  loginDev: () => Promise<void>; // 示例数据登录
   logout: () => void;
   refresh: () => Promise<void>;
   startOAuth: () => void;

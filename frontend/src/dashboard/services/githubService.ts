@@ -281,7 +281,7 @@ export function createGitHubService(token: string): GitHubService {
 }
 
 /**
- * 模拟GitHub数据服务（用于开发和演示）
+ * 模拟 GitHub 数据服务（示例数据路径）
  */
 export class MockGitHubService {
   private isMockMode: boolean;
@@ -302,12 +302,12 @@ export class MockGitHubService {
       id: 12345678,
       avatar_url: 'https://avatars.githubusercontent.com/u/12345678?v=4',
       html_url: 'https://github.com/demo-user',
-      name: 'Demo User',
-      company: 'AI Frontend Inc.',
-      blog: 'https://demo-user.dev',
-      location: 'Shanghai, China',
+      name: '示例用户',
+      company: null,
+      blog: null,
+      location: '中国',
       email: 'demo@example.com',
-      bio: 'Full-stack developer | React enthusiast | Open source contributor',
+      bio: '开发者 · 关注代码质量与协作效率',
       twitter_username: 'demo_user',
       public_repos: 24,
       public_gists: 12,
@@ -332,7 +332,7 @@ export class MockGitHubService {
       full_name: `demo-user/demo-repo-${i + 1}`,
       private: false,
       html_url: `https://github.com/demo-user/demo-repo-${i + 1}`,
-      description: `A sample repository for demonstration purposes #${i + 1}`,
+      description: `开源项目示例 #${i + 1}`,
       fork: i % 4 === 0,
       url: `https://api.github.com/repos/demo-user/demo-repo-${i + 1}`,
       created_at: `202${i % 3}-0${(i % 9) + 1}-${(i % 28) + 1}T00:00:00Z`,
@@ -394,16 +394,16 @@ export class MockGitHubService {
       node_id: `C_kwDOABC123${i}`,
       commit: {
         author: {
-          name: 'Demo User',
+          name: '示例用户',
           email: 'demo@example.com',
           date: new Date(Date.now() - i * 86400000).toISOString()
         },
         committer: {
-          name: 'Demo User',
+          name: '示例用户',
           email: 'demo@example.com',
           date: new Date(Date.now() - i * 86400000).toISOString()
         },
-        message: `feat: Add feature #${i + 1}\n\nThis is a sample commit message for demonstration.`,
+        message: `feat: 功能更新 #${i + 1}\n\n优化实现与测试覆盖。`,
         tree: {
           sha: `tree${i}sha`,
           url: `https://api.github.com/repos/${owner}/${repo}/git/trees/tree${i}sha`
@@ -502,7 +502,7 @@ export class MockGitHubService {
 export function createGitHubServiceAuto(token: string): GitHubService | MockGitHubService {
   // 仅开发模式token走mock，真实JWT必须走后端代理
   if (token.startsWith('github_dev_token_')) {
-    console.log('📱 使用模拟GitHub数据服务（开发模式）');
+    console.log('使用示例 GitHub 数据服务');
     return new MockGitHubService(token);
   }
   

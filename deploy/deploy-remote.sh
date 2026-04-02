@@ -23,6 +23,9 @@ REPO_SSH="${REPO_SSH:-}"
 GIT_BRANCH="${GIT_BRANCH:-master}"
 ENABLE_HTTPS="${ENABLE_HTTPS:-true}"
 EMAIL_FOR_LETSENCRYPT="${EMAIL_FOR_LETSENCRYPT:-}"
+# 服务器上证书文件的绝对路径；两者都设置且 ENABLE_HTTPS 开启时走自有证书，不再运行 certbot
+SSL_CERTIFICATE_PATH="${SSL_CERTIFICATE_PATH:-}"
+SSL_PRIVATE_KEY_PATH="${SSL_PRIVATE_KEY_PATH:-}"
 NODE_MAJOR="${NODE_MAJOR:-20}"
 BACKEND_PORT="${BACKEND_PORT:-3000}"
 
@@ -70,6 +73,16 @@ if [[ "$SKIP_BACKEND" != "true" ]]; then
   fi
 else
   BASE_URL="http://${DOMAIN}"
+fi
+
+USE_CUSTOM_SSL=false
+if [[ "$SKIP_BACKEND" != "true" ]] && { [[ "$ENABLE_HTTPS_EFFECTIVE" == "true" ]] || [[ "$ENABLE_HTTPS_EFFECTIVE" == "1" ]]; }; then
+  if [[ -n "$SSL_CERTIFICATE_PATH" || -n "$SSL_PRIVATE_KEY_PATH" ]]; then
+    [[ -n "$SSL_CERTIFICATE_PATH" && -n "$SSL_PRIVATE_KEY_PATH" ]] || die "自定义 HTTPS 需同时设置 SSL_CERTIFICATE_PATH 与 SSL_PRIVATE_KEY_PATH（服务器上的绝对路径）"
+    [[ "$SSL_CERTIFICATE_PATH" == /* ]] || die "SSL_CERTIFICATE_PATH 必须是绝对路径"
+    [[ "$SSL_PRIVATE_KEY_PATH" == /* ]] || die "SSL_PRIVATE_KEY_PATH 必须是绝对路径"
+    USE_CUSTOM_SSL=true
+  fi
 fi
 
 echo "[1/9] Install system packages..."
@@ -177,7 +190,42 @@ else
 fi
 
 echo "[9/9] Configure Nginx..."
-sudo tee /etc/nginx/sites-available/ai-project >/dev/null <<EOF
+if [[ "$USE_CUSTOM_SSL" == "true" ]]; then
+  sudo test -r "$SSL_CERTIFICATE_PATH" || die "无法读取证书文件（nginx 需可读）: $SSL_CERTIFICATE_PATH"
+  sudo test -r "$SSL_PRIVATE_KEY_PATH" || die "无法读取私钥文件（nginx 需可读）: $SSL_PRIVATE_KEY_PATH"
+  sudo tee /etc/nginx/sites-available/ai-project >/dev/null <<EOF
+server {
+    listen 80;
+    server_name ${NGINX_SERVER_NAME};
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ${NGINX_SERVER_NAME};
+
+    ssl_certificate ${SSL_CERTIFICATE_PATH};
+    ssl_certificate_key ${SSL_PRIVATE_KEY_PATH};
+
+    root ${PROJECT_DIR}/frontend/dist;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:${BACKEND_PORT}/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location / {
+        try_files \$uri /index.html;
+    }
+}
+EOF
+else
+  sudo tee /etc/nginx/sites-available/ai-project >/dev/null <<EOF
 server {
     listen 80;
     server_name ${NGINX_SERVER_NAME};
@@ -199,6 +247,7 @@ server {
     }
 }
 EOF
+fi
 
 sudo ln -sf /etc/nginx/sites-available/ai-project /etc/nginx/sites-enabled/ai-project
 sudo rm -f /etc/nginx/sites-enabled/default
@@ -206,13 +255,17 @@ sudo nginx -t
 sudo systemctl enable nginx
 sudo systemctl restart nginx
 
-if [[ "$ENABLE_HTTPS_EFFECTIVE" == "true" ]]; then
-  echo "[extra] Configure HTTPS with certbot..."
-  sudo apt install -y certbot python3-certbot-nginx
-  if [[ -n "$EMAIL_FOR_LETSENCRYPT" ]]; then
-    sudo certbot --nginx -d "$NGINX_SERVER_NAME" -m "$EMAIL_FOR_LETSENCRYPT" --agree-tos --no-eff-email --non-interactive
+if [[ "$ENABLE_HTTPS_EFFECTIVE" == "true" || "$ENABLE_HTTPS_EFFECTIVE" == "1" ]]; then
+  if [[ "$USE_CUSTOM_SSL" == "true" ]]; then
+    echo "[extra] Skipped certbot（使用 SSL_CERTIFICATE_PATH / SSL_PRIVATE_KEY_PATH 自有证书）"
   else
-    sudo certbot --nginx -d "$NGINX_SERVER_NAME" --agree-tos --register-unsafely-without-email --non-interactive
+    echo "[extra] Configure HTTPS with certbot..."
+    sudo apt install -y certbot python3-certbot-nginx
+    if [[ -n "$EMAIL_FOR_LETSENCRYPT" ]]; then
+      sudo certbot --nginx -d "$NGINX_SERVER_NAME" -m "$EMAIL_FOR_LETSENCRYPT" --agree-tos --no-eff-email --non-interactive
+    else
+      sudo certbot --nginx -d "$NGINX_SERVER_NAME" --agree-tos --register-unsafely-without-email --non-interactive
+    fi
   fi
 else
   echo "[extra] Skipped: HTTPS / certbot（localhost 模式或 ENABLE_HTTPS_EFFECTIVE=false）"

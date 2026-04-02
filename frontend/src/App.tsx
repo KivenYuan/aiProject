@@ -53,7 +53,7 @@ function AppShell() {
                   Dev Metrics
                 </span>
                 <span className="hidden text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:block">
-                  Portfolio · GitHub 数据看板
+                  GitHub 数据看板
                 </span>
               </span>
             </NavLink>
@@ -121,23 +121,7 @@ function AppShell() {
 
         <footer className="border-t border-slate-200/80 bg-white/60 py-8 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70 sm:py-10">
           <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Dev Metrics — 全栈能力展示项目</p>
-            <p className="mt-2 hidden text-xs text-slate-500 dark:text-slate-400 sm:block">
-              React 19 · Vite · TypeScript · Tailwind · Express · JWT · GitHub OAuth
-            </p>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 sm:hidden">
-              React · Vite · TS · Tailwind · Express
-            </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              {['OAuth 2.0', 'REST 代理', '响应式 UI'].map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Dev Metrics — GitHub 开发者数据看板</p>
             <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
               <a
                 href="https://beian.miit.gov.cn/"

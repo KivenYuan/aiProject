@@ -148,7 +148,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
             type="link"
             size="small"
             onClick={() => {
-              alert('忘记密码功能开发中，请联系管理员重置密码。');
+              alert('忘记密码功能暂未开放，请联系管理员重置密码。');
             }}
           >
             忘记密码？
@@ -173,10 +173,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
             size="large"
             block
           >
-            使用演示账户登录
+            一键填入试用账户
           </Button>
           <p className="mt-3 text-center text-xs text-gray-500">
-            <span className="font-medium">演示账户：</span>demo@example.com / Demo@123
+            <span className="font-medium">试用账户：</span>demo@example.com / Demo@123
           </p>
         </div>
       </form>

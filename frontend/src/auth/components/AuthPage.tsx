@@ -23,7 +23,7 @@ const AuthPage: React.FC = () => {
           <h2 className="mt-6 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
             欢迎回来，<span className="text-brand-700">{user.name || user.email}</span>
           </h2>
-          <p className="mt-2 text-sm text-slate-600">账户已登录，可前往仪表盘或继续浏览作品展示。</p>
+          <p className="mt-2 text-sm text-slate-600">账户已登录，可前往仪表盘或继续使用其他功能。</p>
 
           <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50/90 p-4 text-left">
             <div className="flex items-center gap-3">
@@ -69,7 +69,7 @@ const AuthPage: React.FC = () => {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Account</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">登录与注册</h1>
         <p className="mt-2 text-sm text-slate-600">
-          {mode === 'login' ? '使用邮箱演示账号体验 JWT 认证流程' : '创建账户以演示注册与鉴权'}
+          {mode === 'login' ? '使用邮箱与密码登录您的账户' : '填写信息注册新账户'}
         </p>
       </div>
 
@@ -93,7 +93,7 @@ const AuthPage: React.FC = () => {
 
         <div className="border-t border-slate-200 pt-6">
           <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-4 text-center text-sm text-slate-700">
-            <span className="font-medium text-brand-800">演示账号</span>
+            <span className="font-medium text-brand-800">试用账户（可选）</span>
             <span className="mt-1 block font-mono text-xs text-slate-600">
               demo@example.com / Demo@123
             </span>

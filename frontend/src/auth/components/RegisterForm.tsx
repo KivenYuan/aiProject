@@ -99,7 +99,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
     <div className="w-full">
       <div className="mb-6 text-center">
         <h2 className="text-lg font-semibold tracking-tight text-slate-900">注册新账户</h2>
-        <p className="mt-1 text-sm text-slate-600">创建账户以演示注册与鉴权流程</p>
+        <p className="mt-1 text-sm text-slate-600">填写以下信息完成注册</p>
       </div>
 
       {error && (
