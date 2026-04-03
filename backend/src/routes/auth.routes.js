@@ -9,6 +9,58 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const { getAxiosProxyConfig } = require('../utils/proxy-agent');
 
+const GITHUB_CONNECT_TIMEOUT_MS = Number(process.env.GITHUB_CONNECT_TIMEOUT_MS || 10000);
+const GITHUB_RETRY_TIMES = Number(process.env.GITHUB_RETRY_TIMES || 2);
+const GITHUB_RETRY_BASE_DELAY_MS = Number(process.env.GITHUB_RETRY_BASE_DELAY_MS || 300);
+
+const RETRYABLE_NETWORK_ERROR_CODES = new Set([
+  'ECONNRESET',
+  'ETIMEDOUT',
+  'ECONNREFUSED',
+  'EAI_AGAIN',
+  'ENOTFOUND',
+  'EHOSTUNREACH',
+  'ENETUNREACH'
+]);
+
+function isRetryableGitHubError(error) {
+  if (!error) {
+    return false;
+  }
+  if (RETRYABLE_NETWORK_ERROR_CODES.has(error.code)) {
+    return true;
+  }
+  const status = error.response?.status;
+  return status === 502 || status === 503 || status === 504;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withGitHubRetry(label, requestFn) {
+  const maxAttempts = Math.max(1, GITHUB_RETRY_TIMES + 1);
+  let lastError;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableGitHubError(error) || attempt === maxAttempts) {
+        throw error;
+      }
+      const delayMs = GITHUB_RETRY_BASE_DELAY_MS * Math.pow(3, attempt - 1);
+      console.warn(
+        `[GitHub OAuth] ${label} 第 ${attempt}/${maxAttempts} 次失败，${delayMs}ms 后重试:`,
+        error.code || error.response?.status || error.name,
+        error.message
+      );
+      await sleep(delayMs);
+    }
+  }
+  throw lastError;
+}
+
 // 临时内存存储（开发用，生产环境应使用数据库）
 const users = new Map();
 
@@ -212,16 +264,19 @@ router.post('/github', async (req, res) => {
     });
 
     // 调用GitHub OAuth接口获取access_token
-    const tokenResponse = await axios.post(
-      'https://github.com/login/oauth/access_token',
-      params.toString(),
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        ...getAxiosProxyConfig()
-      }
+    const tokenResponse = await withGitHubRetry('交换 access_token', () =>
+      axios.post(
+        'https://github.com/login/oauth/access_token',
+        params.toString(),
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          timeout: GITHUB_CONNECT_TIMEOUT_MS,
+          ...getAxiosProxyConfig()
+        }
+      )
     );
 
     const { access_token, error, error_description } = tokenResponse.data;
@@ -244,14 +299,17 @@ router.post('/github', async (req, res) => {
     console.log('成功获取GitHub访问令牌，长度:', access_token.length);
 
     // 使用access_token获取GitHub用户信息
-    const userResponse = await axios.get('https://api.github.com/user', {
-      headers: {
-        'Authorization': `Bearer ${access_token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'AI-Frontend-Backend'
-      },
-      ...getAxiosProxyConfig()
-    });
+    const userResponse = await withGitHubRetry('获取 GitHub 用户信息', () =>
+      axios.get('https://api.github.com/user', {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'AI-Frontend-Backend'
+        },
+        timeout: GITHUB_CONNECT_TIMEOUT_MS,
+        ...getAxiosProxyConfig()
+      })
+    );
 
     const githubUser = userResponse.data;
 
