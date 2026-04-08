@@ -7,7 +7,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const { getAxiosProxyConfig } = require('../utils/proxy-agent');
+const { getAxiosProxyConfig, getProxyUrl } = require('../utils/proxy-agent');
 
 const GITHUB_CONNECT_TIMEOUT_MS = Number(process.env.GITHUB_CONNECT_TIMEOUT_MS || 10000);
 const GITHUB_RETRY_TIMES = Number(process.env.GITHUB_RETRY_TIMES || 2);
@@ -363,20 +363,54 @@ router.post('/github', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('GitHub OAuth处理错误:', error.code || error.name, error.message);
-
-    if (error.response) {
-      console.error('GitHub API响应错误:', error.response.status, error.response.data);
-      
-      if (error.response.status === 400) {
-        return res.status(400).json({
-          success: false,
-          message: '无效的GitHub授权码'
-        });
-      }
+    const errCode = error.code || '';
+    const errName = error.name || '';
+    const errMsg  = error.message || '';
+    console.error('GitHub OAuth处理错误:', errCode || errName, errMsg);
+    if (error.stack) {
+      console.error('GitHub OAuth错误堆栈:', error.stack);
     }
 
-    if (error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN') {
+    if (error.response) {
+      const status = error.response.status;
+      const data   = error.response.data;
+      console.error('GitHub API响应错误:', status, JSON.stringify(data));
+
+      if (status === 400) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的GitHub授权码，授权码可能已过期或已被使用，请重新点击「使用 GitHub 登录」'
+        });
+      }
+
+      if (status === 401) {
+        return res.status(401).json({
+          success: false,
+          message: 'GitHub 访问令牌无效或已过期，请重新进行 GitHub OAuth 登录'
+        });
+      }
+
+      if (status === 403) {
+        return res.status(403).json({
+          success: false,
+          message: 'GitHub API 请求被拒绝（可能触发了速率限制），请稍后再试'
+        });
+      }
+
+      if (status === 422) {
+        return res.status(400).json({
+          success: false,
+          message: `GitHub 返回参数错误 (422)：${typeof data === 'object' ? JSON.stringify(data) : data}`
+        });
+      }
+
+      return res.status(502).json({
+        success: false,
+        message: `GitHub API 返回异常状态码 ${status}，请稍后再试`
+      });
+    }
+
+    if (errCode === 'ENOTFOUND' || errCode === 'EAI_AGAIN') {
       return res.status(503).json({
         success: false,
         message:
@@ -386,23 +420,30 @@ router.post('/github', async (req, res) => {
       });
     }
 
-    if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
+    if (errCode === 'ECONNRESET' || errCode === 'ETIMEDOUT' || errCode === 'ECONNREFUSED' ||
+        errCode === 'ECONNABORTED' || errCode === 'EHOSTUNREACH' || errCode === 'ENETUNREACH' ||
+        errCode === 'EPROTO' || errCode === 'ERR_SOCKET_CLOSED' ||
+        errCode === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+      const proxyHint = getProxyUrl()
+        ? `（当前 HTTPS_PROXY = ${getProxyUrl().replace(/\/\/([^:@/]+):([^@/]+)@/, '//$1:***@')}，请确认代理软件已开启且端口正确）`
+        : '（未配置 HTTPS_PROXY）';
       return res.status(503).json({
         success: false,
-        message: '无法连接 GitHub，请检查网络或系统代理后重试（若已配置 HTTPS_PROXY，请确认代理软件已开启且端口正确）'
+        message: `无法连接 GitHub (${errCode})，请检查服务器网络${proxyHint}`
       });
     }
 
-    if (error.name === 'JsonWebTokenError' || /secret|jwt/i.test(String(error.message))) {
+    if (errName === 'JsonWebTokenError' || /secret|jwt/i.test(errMsg)) {
       return res.status(500).json({
         success: false,
         message: '签发登录令牌失败，请确认已配置有效的 JWT_SECRET'
       });
     }
-    
+
+    const safeDetail = `[${errCode || errName || 'UnknownError'}] ${errMsg}`;
     res.status(500).json({
       success: false,
-      message: process.env.NODE_ENV === 'development' ? `GitHub授权处理失败: ${error.message}` : 'GitHub授权处理失败'
+      message: `GitHub授权处理失败: ${safeDetail}`
     });
   }
 });
