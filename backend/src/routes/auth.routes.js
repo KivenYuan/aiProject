@@ -9,18 +9,21 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const { getAxiosProxyConfig, getProxyUrl } = require('../utils/proxy-agent');
 
-const GITHUB_CONNECT_TIMEOUT_MS = Number(process.env.GITHUB_CONNECT_TIMEOUT_MS || 10000);
-const GITHUB_RETRY_TIMES = Number(process.env.GITHUB_RETRY_TIMES || 2);
-const GITHUB_RETRY_BASE_DELAY_MS = Number(process.env.GITHUB_RETRY_BASE_DELAY_MS || 300);
+const GITHUB_CONNECT_TIMEOUT_MS = Number(process.env.GITHUB_CONNECT_TIMEOUT_MS || 15000);
+const GITHUB_RETRY_TIMES = Number(process.env.GITHUB_RETRY_TIMES || 3);
+const GITHUB_RETRY_BASE_DELAY_MS = Number(process.env.GITHUB_RETRY_BASE_DELAY_MS || 500);
 
 const RETRYABLE_NETWORK_ERROR_CODES = new Set([
   'ECONNRESET',
   'ETIMEDOUT',
   'ECONNREFUSED',
+  'ECONNABORTED',
   'EAI_AGAIN',
   'ENOTFOUND',
   'EHOSTUNREACH',
-  'ENETUNREACH'
+  'ENETUNREACH',
+  'EPROTO',
+  'ERR_SOCKET_CLOSED'
 ]);
 
 function isRetryableGitHubError(error) {
