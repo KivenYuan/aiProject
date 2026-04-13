@@ -186,12 +186,34 @@ export interface GitHubIssue {
   html_url: string;
 }
 
+/** 热力图 Tooltip 中单条提交摘要 */
+export interface HeatmapDayCommitPreview {
+  sha: string;
+  message: string;
+  html_url: string;
+  repo: string;
+  additions?: number;
+  deletions?: number;
+}
+
+/** 热力图单日行级汇总（GitHub 单笔提交 stats 聚合） */
+export interface HeatmapDayLineStats {
+  additions: number;
+  deletions: number;
+  coveredCommits: number;
+}
+
 // 统计信息
 export interface GitHubStats {
   user: GitHubUser;
   repos: GitHubRepo[];
   totalCommits: number;
   recentCommits: GitHubCommit[];
+  /** 按 UTC 日期 YYYY-MM-DD 的提交次数 */
+  commitHeatmap: Record<string, number>;
+  commitHeatmapLineStats: Record<string, HeatmapDayLineStats>;
+  /** 按日列出最多 10 条提交（含标题、仓库、链接；行数仅对已拉取详情的提交有值） */
+  commitHeatmapDayCommits: Record<string, HeatmapDayCommitPreview[]>;
   recentActivity: GitHubEvent[];
   languages: Record<string, number>;
   repoCount: number;

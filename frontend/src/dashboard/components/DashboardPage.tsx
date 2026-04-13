@@ -9,6 +9,7 @@ import { useGitHub } from '../contexts/GitHubContext';
 import GitHubStatsCard from './GitHubStatsCard';
 import RepoList from './RepoList';
 import CommitTimeline from './CommitTimeline';
+import CommitHeatmap from './CommitHeatmap';
 import ActivityFeed from './ActivityFeed';
 import DashboardSkeleton from './DashboardSkeleton';
 import { generateOAuthUrl, isGitHubOAuthConfigured } from '../utils/github.utils';
@@ -173,6 +174,14 @@ const DashboardPage: React.FC = () => {
         ) : (
           <>
             {stats && <GitHubStatsCard stats={stats} />}
+
+            {stats && (
+              <div className="mt-8 w-full min-w-0">
+                <CommitHeatmap
+                  commitHeatmap={stats.commitHeatmap}
+                />
+              </div>
+            )}
 
             <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
               <div>

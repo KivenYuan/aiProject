@@ -90,6 +90,30 @@ const DashboardSkeleton: React.FC = () => {
         </div>
       </div>
 
+      <div className={`${panel} p-4 sm:p-6`}>
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2">
+            <div className={`h-6 w-32 ${bone}`} />
+            <div className={`h-3.5 w-full max-w-md ${bone}`} />
+          </div>
+          <div className={`h-4 w-36 ${bone}`} />
+        </div>
+        <div className="flex gap-px overflow-hidden pt-1">
+          {Array.from({ length: 53 }).map((_, wi) => (
+            <div key={wi} className="flex flex-col gap-px">
+              {[0, 1, 2, 3, 4, 5, 6].map((di) => (
+                <div key={di} className={`h-2.5 w-2.5 rounded-sm sm:h-3 sm:w-3 ${bone}`} />
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-end gap-px">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className={`h-2.5 w-2.5 rounded-sm sm:h-3 sm:w-3 ${bone}`} />
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* 仓库列表骨架 */}
         <div className={`${panel} p-4 sm:p-6`}>

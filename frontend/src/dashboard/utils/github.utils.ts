@@ -5,7 +5,7 @@
 /**
  * GitHub 工具函数
  */
-import type { GitHubRepo } from '../types/github.types';
+import type { GitHubCommit, GitHubRepo, HeatmapDayCommitPreview } from '../types/github.types';
 
 /**
  * 格式化日期
@@ -84,6 +84,64 @@ export function groupReposByLanguage(repos: GitHubRepo[]): Record<string, GitHub
     acc[lang].push(repo);
     return acc;
   }, {} as Record<string, GitHubRepo[]>);
+}
+
+/** 从 GitHub REST commit.url 解析 owner/repo */
+export function repoFullNameFromCommitApiUrl(url: string): string {
+  const m = url.match(/\/repos\/([^/]+\/[^/]+)\//);
+  return m ? m[1] : '';
+}
+
+/** 按 UTC 日期聚合提交次数（同一 sha 只计一次） */
+export function buildCommitHeatmapFromCommits(commits: GitHubCommit[]): Record<string, number> {
+  const bySha = new Map<string, GitHubCommit>();
+  for (const c of commits) {
+    if (c?.sha && !bySha.has(c.sha)) {
+      bySha.set(c.sha, c);
+    }
+  }
+  const counts: Record<string, number> = {};
+  for (const c of bySha.values()) {
+    const raw = c.commit?.committer?.date;
+    if (!raw) continue;
+    const day = raw.slice(0, 10);
+    counts[day] = (counts[day] || 0) + 1;
+  }
+  return counts;
+}
+
+/** 按日列出提交摘要（用于热力图 Tooltip，无行数详情） */
+export function buildHeatmapDayCommitsFromCommits(
+  commits: GitHubCommit[],
+  maxPerDay = 10
+): Record<string, HeatmapDayCommitPreview[]> {
+  const byDay: Record<string, GitHubCommit[]> = {};
+  for (const c of commits) {
+    const raw = c.commit?.committer?.date;
+    if (!raw || !c.sha) continue;
+    const day = raw.slice(0, 10);
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(c);
+  }
+  const out: Record<string, HeatmapDayCommitPreview[]> = {};
+  for (const day of Object.keys(byDay)) {
+    const list = byDay[day]
+      .sort(
+        (a, b) =>
+          new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime()
+      )
+      .slice(0, maxPerDay);
+    out[day] = list.map((c) => {
+      const title = getCommitTitle(c.commit.message);
+      return {
+        sha: c.sha,
+        message: title.length > 100 ? `${title.slice(0, 100)}…` : title,
+        html_url: c.html_url || '',
+        repo: repoFullNameFromCommitApiUrl(c.url),
+      };
+    });
+  }
+  return out;
 }
 
 /**

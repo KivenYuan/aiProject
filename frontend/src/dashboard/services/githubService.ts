@@ -11,8 +11,14 @@ import type {
   GitHubIssue,
   GitHubStats,
   GitHubError,
+  HeatmapDayLineStats,
+  HeatmapDayCommitPreview,
 } from '../types/github.types';
-import { getGitHubAccessToken } from '../utils/github.utils';
+import {
+  buildCommitHeatmapFromCommits,
+  buildHeatmapDayCommitsFromCommits,
+  getGitHubAccessToken,
+} from '../utils/github.utils';
 
 // API基础URL（从环境变量获取）
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
@@ -120,6 +126,9 @@ export class GitHubService {
         user: GitHubUser;
         repos: GitHubRepo[];
         recentCommits: GitHubCommit[];
+        commitHeatmap?: Record<string, number>;
+        commitHeatmapLineStats?: Record<string, HeatmapDayLineStats>;
+        commitHeatmapDayCommits?: Record<string, HeatmapDayCommitPreview[]>;
         recentActivity: GitHubEvent[];
         languages: Array<{ name: string; count: number }>;
         stats: {
@@ -133,11 +142,28 @@ export class GitHubService {
         };
       }>('/github/dashboard', this.token);
 
+      const commitHeatmap =
+        dashboardData.commitHeatmap && typeof dashboardData.commitHeatmap === 'object'
+          ? dashboardData.commitHeatmap
+          : buildCommitHeatmapFromCommits(dashboardData.recentCommits);
+      const commitHeatmapLineStats =
+        dashboardData.commitHeatmapLineStats && typeof dashboardData.commitHeatmapLineStats === 'object'
+          ? dashboardData.commitHeatmapLineStats
+          : {};
+      const commitHeatmapDayCommits =
+        dashboardData.commitHeatmapDayCommits && typeof dashboardData.commitHeatmapDayCommits === 'object'
+          ? dashboardData.commitHeatmapDayCommits
+          : buildHeatmapDayCommitsFromCommits(dashboardData.recentCommits);
+      const totalFromHeatmap = Object.values(commitHeatmap).reduce((sum, n) => sum + n, 0);
+
       return {
         user: dashboardData.user,
         repos: dashboardData.repos,
-        totalCommits: dashboardData.recentCommits.length,
+        totalCommits: totalFromHeatmap || dashboardData.recentCommits.length,
         recentCommits: dashboardData.recentCommits,
+        commitHeatmap,
+        commitHeatmapLineStats,
+        commitHeatmapDayCommits,
         recentActivity: dashboardData.recentActivity,
         languages: dashboardData.languages.reduce((acc, lang) => {
           acc[lang.name] = lang.count;
@@ -200,13 +226,21 @@ export class GitHubService {
         console.warn('获取Issue/PR统计失败:', error);
       }
       
+      const sortedRecent = recentCommits.sort(
+        (a, b) =>
+          new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime()
+      );
+      const commitHeatmap = buildCommitHeatmapFromCommits(sortedRecent);
+      const totalFromHeatmap = Object.values(commitHeatmap).reduce((sum, n) => sum + n, 0);
+
       return {
         user,
         repos,
-        recentCommits: recentCommits.sort((a, b) => 
-          new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime()
-        ).slice(0, 20),
-        totalCommits: recentCommits.length,
+        recentCommits: sortedRecent.slice(0, 20),
+        totalCommits: totalFromHeatmap || sortedRecent.length,
+        commitHeatmap,
+        commitHeatmapLineStats: {},
+        commitHeatmapDayCommits: buildHeatmapDayCommitsFromCommits(sortedRecent),
         recentActivity: recentActivity.slice(0, 20),
         languages,
         repoCount: repos.length,
@@ -479,12 +513,51 @@ export class MockGitHubService {
       'Java': 1,
       'HTML': 1
     };
+
+    const commitHeatmap: Record<string, number> = {};
+    const now = new Date();
+    for (let i = 0; i < 300; i++) {
+      const d = new Date(now);
+      d.setUTCDate(d.getUTCDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const n = (i * 7 + (i % 13)) % 29;
+      if (n > 18) commitHeatmap[key] = Math.min(14, n - 12);
+      else if (n > 14) commitHeatmap[key] = 2;
+      else if (n > 11) commitHeatmap[key] = 1;
+    }
+    const totalCommits = Object.values(commitHeatmap).reduce((sum, n) => sum + n, 0);
+
+    const commitHeatmapLineStats: Record<string, HeatmapDayLineStats> = {};
+    const commitHeatmapDayCommits: Record<string, HeatmapDayCommitPreview[]> = {};
+    for (const [day, count] of Object.entries(commitHeatmap)) {
+      const seed = day.split('-').reduce((acc, x) => acc + parseInt(x, 10), 0);
+      commitHeatmapLineStats[day] = {
+        additions: count * (12 + (seed % 24)),
+        deletions: count * (2 + (seed % 9)),
+        coveredCommits: count,
+      };
+      const list: HeatmapDayCommitPreview[] = [];
+      for (let j = 0; j < Math.min(count, 10); j++) {
+        list.push({
+          sha: `abc${day.replace(/-/g, '')}${j}def`,
+          message: `feat: 示例功能 #${j + 1}（mock）`,
+          html_url: `https://github.com/demo-user/demo-repo-${(j % 3) + 1}/commit/abc${j}`,
+          repo: `demo-user/demo-repo-${(j % 3) + 1}`,
+          additions: 8 + j * 4 + (seed % 7),
+          deletions: j * 2,
+        });
+      }
+      commitHeatmapDayCommits[day] = list;
+    }
     
     return {
       user,
       repos,
-      totalCommits: 487,
+      totalCommits,
       recentCommits,
+      commitHeatmap,
+      commitHeatmapLineStats,
+      commitHeatmapDayCommits,
       recentActivity,
       languages,
       repoCount: repos.length,

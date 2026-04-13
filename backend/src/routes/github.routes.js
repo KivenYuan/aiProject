@@ -300,14 +300,15 @@ router.get('/dashboard', authenticate, async (req, res) => {
     const user = userResponse.data;
     const repos = reposResponse.data;
 
-    // 获取最近提交（从前3个仓库，并行）
-    const reposToCheck = repos.slice(0, 3);
+    // 热力图 + 时间线：8 个仓库、近一年提交；去重后做按日统计、行数详情与 Tooltip 用提交列表
+    const reposForCommits = repos.slice(0, 8);
+    const sinceIso = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
     const commitResults = await Promise.all(
-      reposToCheck.map(async (repo) => {
+      reposForCommits.map(async (repo) => {
         try {
           const commitsResponse = await githubGet(
             `${GITHUB_API_BASE}/repos/${repo.owner.login}/${repo.name}/commits`,
-            { author: user.login, per_page: 5 }
+            { author: user.login, per_page: 100, since: sinceIso }
           );
           return commitsResponse.data.map(commit => ({
             ...commit,
@@ -320,7 +321,98 @@ router.get('/dashboard', authenticate, async (req, res) => {
         }
       })
     );
-    const recentCommits = commitResults.flat();
+    const allCommitsFlat = commitResults.flat();
+    const bySha = new Map();
+    for (const c of allCommitsFlat) {
+      if (c && c.sha && !bySha.has(c.sha)) {
+        bySha.set(c.sha, c);
+      }
+    }
+    const uniqueCommits = [...bySha.values()];
+    const recentCommits = uniqueCommits
+      .sort((a, b) => new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime())
+      .slice(0, 15);
+
+    const commitHeatmap = {};
+    for (const c of uniqueCommits) {
+      const raw = c.commit?.committer?.date;
+      if (!raw) continue;
+      const day = raw.slice(0, 10);
+      commitHeatmap[day] = (commitHeatmap[day] || 0) + 1;
+    }
+
+    const HEATMAP_STATS_MAX_COMMITS = 80;
+    const HEATMAP_STATS_CONCURRENCY = 8;
+    const sortedForLineStats = [...uniqueCommits].sort(
+      (a, b) =>
+        new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime()
+    );
+    const commitsForLineStats = sortedForLineStats.slice(0, HEATMAP_STATS_MAX_COMMITS);
+    const shaLineStats = {};
+    const commitHeatmapLineStats = {};
+
+    for (let i = 0; i < commitsForLineStats.length; i += HEATMAP_STATS_CONCURRENCY) {
+      const chunk = commitsForLineStats.slice(i, i + HEATMAP_STATS_CONCURRENCY);
+      const settled = await Promise.allSettled(
+        chunk.map(async (c) => {
+          const owner = c.repoOwner;
+          const name = c.repo;
+          const sha = c.sha;
+          const raw = c.commit?.committer?.date;
+          if (!owner || !name || !sha || !raw) return null;
+          const day = raw.slice(0, 10);
+          const res = await githubGet(
+            `${GITHUB_API_BASE}/repos/${owner}/${name}/commits/${sha}`
+          );
+          const st = res.data.stats || {};
+          const additions = typeof st.additions === 'number' ? st.additions : 0;
+          const deletions = typeof st.deletions === 'number' ? st.deletions : 0;
+          return { sha, day, additions, deletions };
+        })
+      );
+      for (const r of settled) {
+        if (r.status !== 'fulfilled' || !r.value) continue;
+        const { sha, day, additions, deletions } = r.value;
+        shaLineStats[sha] = { additions, deletions };
+        if (!commitHeatmapLineStats[day]) {
+          commitHeatmapLineStats[day] = { additions: 0, deletions: 0, coveredCommits: 0 };
+        }
+        commitHeatmapLineStats[day].additions += additions;
+        commitHeatmapLineStats[day].deletions += deletions;
+        commitHeatmapLineStats[day].coveredCommits += 1;
+      }
+    }
+
+    const MAX_COMMITS_PER_DAY = 10;
+    const commitsByDay = {};
+    for (const c of uniqueCommits) {
+      const raw = c.commit?.committer?.date;
+      if (!raw || !c.sha) continue;
+      const day = raw.slice(0, 10);
+      if (!commitsByDay[day]) commitsByDay[day] = [];
+      commitsByDay[day].push(c);
+    }
+    const commitHeatmapDayCommits = {};
+    for (const day of Object.keys(commitsByDay)) {
+      const list = commitsByDay[day]
+        .sort(
+          (a, b) =>
+            new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime()
+        )
+        .slice(0, MAX_COMMITS_PER_DAY);
+      commitHeatmapDayCommits[day] = list.map((c) => {
+        const msg = (c.commit?.message || '').split('\n')[0].trim();
+        const line = shaLineStats[c.sha];
+        return {
+          sha: c.sha,
+          message: msg.length > 100 ? `${msg.slice(0, 100)}…` : msg,
+          html_url: c.html_url || '',
+          repo: c.repoOwner && c.repo ? `${c.repoOwner}/${c.repo}` : String(c.repo || ''),
+          additions: line?.additions,
+          deletions: line?.deletions
+        };
+      });
+    }
 
     // 计算统计信息
     const starCount = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
@@ -367,9 +459,10 @@ router.get('/dashboard', authenticate, async (req, res) => {
       data: {
         user,
         repos: repos.slice(0, 10), // 只返回前10个仓库
-        recentCommits: recentCommits
-          .sort((a, b) => new Date(b.commit.committer.date).getTime() - new Date(a.commit.committer.date).getTime())
-          .slice(0, 15),
+        recentCommits,
+        commitHeatmap,
+        commitHeatmapLineStats,
+        commitHeatmapDayCommits,
         recentActivity: recentActivity.slice(0, 15),
         languages: Object.entries(languages)
           .map(([name, count]) => ({ name, count }))
